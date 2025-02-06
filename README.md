@@ -1,2 +1,2 @@
-# TRIP
-Travel Reporting Interface Platform
+# RIDE
+Route Information and Data Entry
