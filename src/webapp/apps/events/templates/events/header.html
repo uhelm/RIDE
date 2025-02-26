@@ -1,0 +1,7 @@
+  {% if sort == 'asc' %}
+      <a href="?page={{ page.number }}&size={{ size }}&ordering=-{{ field }}">{{ column }} ⭡</a>
+  {% elif sort == 'desc' %}
+      <a href="?page={{ page.number }}&size={{ size }}&ordering={{ field }}">{{ column }} ⭣</a>
+  {% else %}
+      <a href="?page={{ page.number }}&size={{ size }}&ordering={{ field }}">{{ column }}</a>
+  {% endif %}

@@ -1,0 +1,282 @@
+/*! modern-normalize v3.0.1 | MIT License | https://github.com/sindresorhus/modern-normalize */
+
+*,
+::before,
+::after {
+	box-sizing: border-box;
+}
+
+html {
+	font-family:
+		'BC Sans',
+		system-ui,
+		'Segoe UI',
+		Roboto,
+		Helvetica,
+		Arial,
+		sans-serif,
+		'Apple Color Emoji',
+		'Segoe UI Emoji'; /* 1 */
+	line-height: 1.15; /* 2 */
+	-webkit-text-size-adjust: 100%; /* 3 */
+	tab-size: 4; /* 4 */
+}
+
+body {
+	margin: 0;
+}
+
+b,
+strong {
+	font-weight: bolder;
+}
+
+code,
+kbd,
+samp,
+pre {
+	font-family:
+		ui-monospace,
+		SFMono-Regular,
+		Consolas,
+		'Liberation Mono',
+		Menlo,
+		monospace; /* 1 */
+	font-size: 1em; /* 2 */
+}
+
+small {
+	font-size: 80%;
+}
+
+sub,
+sup {
+	font-size: 75%;
+	line-height: 0;
+	position: relative;
+	vertical-align: baseline;
+}
+
+sub {
+	bottom: -0.25em;
+}
+
+sup {
+	top: -0.5em;
+}
+
+table {
+	border-color: currentcolor;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+	font-family: inherit; /* 1 */
+	font-size: 100%; /* 1 */
+	line-height: 1.15; /* 1 */
+	margin: 0; /* 2 */
+}
+
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+	-webkit-appearance: button;
+}
+
+legend {
+	padding: 0;
+}
+
+progress {
+	vertical-align: baseline;
+}
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+	height: auto;
+}
+
+[type='search'] {
+	-webkit-appearance: textfield; /* 1 */
+	outline-offset: -2px; /* 2 */
+}
+
+::-webkit-search-decoration {
+	-webkit-appearance: none;
+}
+
+
+::-webkit-file-upload-button {
+	-webkit-appearance: button; /* 1 */
+	font: inherit; /* 2 */
+}
+
+summary {
+	display: list-item;
+}
+
+/* Fonts
+ * ------------------------------------------------------------------------- */
+
+ @font-face {
+  font-family: "BC Sans";
+  font-style: normal;
+  font-weight: 400;
+  src: url("fonts/bc-sans/BCSans-Regular.woff2") format("woff2"),
+       url("fonts/bc-sans/BCSans-Regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "BC Sans";
+  font-style: italic;
+  font-weight: 400;
+  src: url("fonts/bc-sans/BCSans-Italic.woff2") format("woff2"),
+       url("fonts/bc-sans/BCSans-Italic.woff") format("woff");
+}
+
+@font-face {
+  font-family: "BC Sans";
+  font-style: normal;
+  font-weight: 300;
+  src: url("fonts/bc-sans/BCSans-Light.woff2") format("woff2"),
+       url("fonts/bc-sans/BCSans-Light.woff") format("woff");
+}
+
+@font-face {
+  font-family: "BC Sans";
+  font-style: italic;
+  font-weight: 300;
+  src: url("fonts/bc-sans/BCSans-LightItalic.woff2") format("woff2"),
+       url("fonts/bc-sans/BCSans-LightItalic.woff") format("woff");
+}
+
+@font-face {
+  font-family: "BC Sans";
+  font-style: normal;
+  font-weight: 700;
+  src: url("fonts/bc-sans/BCSans-Bold.woff2") format("woff2"),
+       url("fonts/bc-sans/BCSans-Bold.woff") format("woff");
+}
+
+@font-face {
+  font-family: "BC Sans";
+  font-style: italic;
+  font-weight: 700;
+  src: url("fonts/bc-sans/BCSans-BoldItalic.woff2") format("woff2"),
+       url("fonts/bc-sans/BCSans-BoldItalic.woff") format("woff");
+}
+
+@font-face {
+	font-family: 'Aboriginal Sans';
+	src: url('fonts/aboriginal-sans/AboriginalSans.woff2') format('woff2'),
+			url('fonts/aboriginal-sans/AboriginalSans.woff') format('woff');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Aboriginal Serif';
+	src: url('fonts/aboriginal-serif/AboriginalSerif.woff2') format('woff2'),
+			url('fonts/aboriginal-serif/AboriginalSerif.woff') format('woff');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Aboriginal Serif';
+	src: url('fonts/aboriginal-serif/AboriginalSerif.woff2') format('woff2'),
+			url('fonts/aboriginal-serif/AboriginalSerif.woff') format('woff');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* CSS reset complete, add CSS below this line
+ * ------------------------------------------------------------------------- */
+
+body {
+  font-size: 16px;
+  font-weight: 400;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+}
+
+h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 36px;
+}
+
+h4 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+body > header {
+	display: flex;
+	align-items: baseline;
+	padding: 0 1rem 0.5rem 1rem;
+	border-bottom: solid 1px #999;
+}
+
+body > header > h1 {
+	margin: 0 1rem 0 0;
+	flex: 0;
+	min-width: 10rem;
+}
+
+body > header ul {
+	list-style: none;
+	flex: 1;
+	margin: 0;
+	padding: 0;
+}
+
+body > header > ul > li {
+	display: inline-block;
+	margin-right: 2rem;
+}
+
+body > header > ul > li.disabled {
+	color: #dddddd;
+}
+
+body > header > .user {
+	flex: 0;
+	min-width: 10rem;
+	text-align: right;
+}
+
+body > main {
+	padding: 0;
+
+	overflow: hidden;
+}
+
+a {
+	text-decoration: none;
+	color: #1A5A96;
+}
+
+a.active {
+	text-decoration: underline;
+}
+

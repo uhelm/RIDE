@@ -1,0 +1,39 @@
+{% extends 'events/base.html' %}
+
+{% load lists %}
+
+{% block title %}{{ super }} List{% endblock %}
+
+{% block content %}
+  <div class="grid-list">
+    <div class="controls">
+    {% paginate %}
+    {% page_sizes %}
+    </div>
+
+    <div class="events-list">
+      <span class="first header">{% sortable 'ID' %}</span>
+      <span class="header">{% sortable 'Headline' %}</span>
+      <span class="header">{% sortable 'Closure' 'is_closure' %}</span>
+      <span class="header">{% sortable 'Type' 'event_type' %}</span>
+      <span class="header">{% sortable 'Subtype' 'event_subtype' %}</span>
+      <span class="header">{% sortable 'Status' %}</span>
+      <span class="header">{% sortable 'Severity' %}</span>
+    {% for event in events %}
+      <span class="first"><a href="{% url 'events:update' event.id %}">{{ event.id }}</a></span>
+      <span>{{ event.headline }}</span>
+      <span>{{ event.is_closure }}</span>
+      <span>{{ event.get_event_type_display }}</span>
+      <span>{{ event.get_event_subtype_display }}</span>
+      <span>{{ event.get_status_display }}</span>
+      <span>{{ event.get_severity_display }}</span>
+    {% endfor %}
+    </div>
+
+    <div class="controls">
+    {% paginate %}
+    {% page_sizes %}
+    </div>
+
+  </div>
+{% endblock content %}

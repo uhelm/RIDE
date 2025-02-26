@@ -1,0 +1,10 @@
+<div class="page-size">
+  page size
+{% for size in sizes %}
+  {% if size == current %}
+  <span class="current">{{ current }}</span>
+  {% else %}
+  <span class="page-link"><a href="?page=1&size={{ size }}&ordering={{ ordering }}">{{ size }}</a></span>
+  {% endif %}
+{% endfor %}
+</div>

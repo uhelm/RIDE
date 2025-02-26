@@ -1,0 +1,123 @@
+import os
+from pathlib import Path
+import environ
+
+from corsheaders.defaults import default_headers
+
+# Base dir and env
+BASE_DIR = Path(__file__).resolve().parents[4]
+SRC_DIR = Path(__file__).resolve().parents[3]
+APP_DIR = Path(__file__).resolve().parents[2]
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / '.env', overwrite=True)
+
+SECRET_KEY = env('SECRET_KEY')
+DEBUG = env('DEBUG') == 'True'
+
+
+ALLOWED_HOSTS = []
+
+# Paths and urls
+APPEND_SLASH = True
+ROOT_URLCONF = 'config.urls'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(SRC_DIR, 'static')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(SRC_DIR, 'media')
+FRONTEND_BASE_URL = env('FRONTEND_BASE_URL', default='http://localhost:8000/')
+
+# Security
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS')
+CORS_ORIGIN_WHITELIST = env.list('DJANGO_CORS_ORIGIN_WHITELIST')
+CSRF_TRUSTED_ORIGINS = env.list('DJANGO_CORS_ORIGIN_WHITELIST')
+CORS_ALLOW_HEADERS = default_headers + ('contenttype',)
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_SECURE = env.bool('DJANGO_CSRF_COOKIE_SECURE')
+SECURE_SSL_REDIRECT = env.bool('DJANGO_SECURE_SSL_REDIRECT')
+SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
+# Application definition
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.gis',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'debug_toolbar',
+    'apps.ride',
+    'apps.events',
+    'apps.users',
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [APP_DIR / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'config.wsgi.application'
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env.int('DB_PORT'),
+    }
+}
+
+
+LANGUAGE_CODE = 'en-us'
+
+TIME_ZONE = 'UTC'
+USE_I18N = False
+USE_TZ = True
+
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# On windows, GDAL and GEOS require explicit paths to the dlls
+if os.name == 'nt':
+    GEOS_LIBRARY_PATH = env('GEOS_LIBRARY_PATH')
+    GDAL_LIBRARY_PATH = env('GDAL_LIBRARY_PATH')
+
+
+# Django Debug Toolbar settings
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+
+SHOW_DEBUG_TOOLBAR = env('SHOW_DEBUG_TOOLBAR', default=False)
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: SHOW_DEBUG_TOOLBAR,
+}

@@ -1,0 +1,29 @@
+# file based env values
+.env
+.env.backup
+
+# Build files
+*.pyc
+*.pyo
+*.whl
+
+# IDE config files
+.idea
+*.code-workspace
+.vscode
+
+# Virtual environments
+.venv
+
+# Python coverage file
+.coverage
+
+src/media/
+src/static/
+infrastructure/yaml
+src/scripts/
+samples/
+
+notes
+
+db.sqlite3

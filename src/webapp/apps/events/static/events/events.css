@@ -1,0 +1,115 @@
+main > div.events-main {
+  display: flex;
+  height: 100%;
+}
+
+.events-main > menu {
+  padding: 1rem 1rem 0 1rem;
+  margin-right: 1rem;
+	min-width: 10rem;
+  margin-top: -0.4rem;
+}
+
+.events-main > menu > h3 {
+  margin: 0;
+}
+
+.events-main main {
+  overflow: auto;
+  flex: 1;
+  padding: 1rem 1rem 0 0;
+}
+
+form > div {
+  display: flex;
+  margin-bottom: 0.5rem;
+  align-items: baseline;
+}
+
+form > div > label {
+  min-width: 10rem;
+  text-align: right;
+  padding-right: 1rem;
+}
+
+.events-list {
+  display: grid;
+  grid-template-columns: 8rem auto 5rem 12rem 15rem 8rem 8rem;
+  grid-template-rows: auto;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.events-list span {
+  border-top: solid 1px #ddd;
+  border-left: solid 1px #ddd;
+  padding: 0.2rem;
+}
+
+.events-list span.first {
+  border-left: none;
+  padding-left: 0rem;
+}
+
+.events-list > .header {
+  font-weight: bolder;
+  border-top: none;
+}
+
+div.controls {
+  display: flex;
+  margin-bottom: 1rem;
+  align-items: baseline;
+  font-size: smaller;
+}
+
+div.controls *:first-child {
+  flex: 1;
+}
+
+.pagination .previous {
+  margin-right: 2rem;
+}
+
+.pagination .next {
+  margin-left: 2rem;
+}
+
+.controls .page-link {
+  margin: 0 0.15rem;
+}
+
+.controls .current {
+  margin: 0 0.5rem;
+  font-size: larger;
+}
+
+.page-size {
+
+}
+
+.dj_map_wrapper {
+  height: 30rem;
+  width: 60rem;
+  display: flex;
+}
+
+.dj_map {
+  width: 30rem;
+  border: solid 1px #000;
+}
+
+.dj_map_wrapper textarea {
+  width: 30rem;
+  padding: 0.5rem;
+  font-size: 0.7rem;;
+  font-family: 'Roboto Mono', monospace;
+}
+
+.fieldWrapper.geometry {
+  align-items: stretch;
+}
+
+.fieldWrapper.geometry label {
+  margin-top: 0.1rem;
+}

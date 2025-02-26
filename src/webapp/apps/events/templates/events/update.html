@@ -1,0 +1,11 @@
+{% extends 'events/base.html' %}
+
+{% block title %}{{ super }} update{% endblock %}
+
+{% block content %}
+<form method="POST" action="{% url "events:update" form.instance.id %}">
+  {% csrf_token %}
+  {{ form }}
+  <button type="submit">Save Changes</button>
+</form>
+{% endblock content %}

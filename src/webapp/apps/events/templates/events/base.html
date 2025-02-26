@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Events{% endblock %}
+
+{% block main %}
+<div class="events-main">
+  <menu>
+    <h3>Events</h3>
+    <p><a href="{% url 'events:list' %}" class="{% if '/events/list' in request.path %}active{% endif %}">List</a></p>
+    <p><a href="{% url 'events:create' %}" class="{% if '/events/create' in request.path %}active{% endif %}">Create</a></p>
+
+  </menu>
+  <main>{% block content %}{% endblock content %}</main>
+</div>
+{% endblock main %}
