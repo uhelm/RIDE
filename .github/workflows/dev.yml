@@ -39,7 +39,10 @@ jobs:
         with:
           context: ./compose/webapp/
           push: true
-          tags: latest latest-dev ${{ github.sha }}
+          tags: | 
+            latest
+            latest-dev
+            ${{ github.sha }}
           labels: app=ride 
           build-args:
             DEBUG_BUILD=true
