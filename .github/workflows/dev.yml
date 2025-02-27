@@ -1,0 +1,75 @@
+name: 1. Build & Deploy to Dev
+
+#Will automatically run on a push to main, but can also be run manually
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+    - '.github/**'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+
+jobs:
+  build-and-push-webapp:
+    runs-on: ubuntu-latest
+    name: Build & Push Webapp Image
+#    environment: dev
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+    
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: ./compose/webapp/
+          push: true
+          tags: latest latest-dev ${{ github.sha }}
+          labels: app=ride 
+          build-args:
+            DEBUG_BUILD=true
+
+
+  # versionUpdate:
+  #   needs: [build-and-push-webapp]
+  #   runs-on: ubuntu-latest
+  #   name: Deploy Latest Images
+  #   environment:
+  #     name: dev
+  #     url: https://dev-ride.apps.gold.devops.gov.bc.ca
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
+
+  #   - name: Install CLI tools from OpenShift Mirror
+  #     uses: redhat-actions/openshift-tools-installer@v1
+  #     with:
+  #       oc: "4"
+     
+  #   - name: Authenticate and set context
+  #     uses: redhat-actions/oc-login@v1
+  #     with:
+  #       openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+  #       openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+  #       namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+  #       insecure_skip_tls_verify: true
+
+  #   - name: Helm upgrade on OpenShift Environment
+  #     run: |
+  #       helm dependency update ./infrastructure/main
+  #       helm upgrade dev-drivebc -f ./infrastructure/main/values-dev.yaml ./infrastructure/main --set django.image.tag="${{ github.sha }}" --set redis.image.tag="${{ github.sha }}" --set static.image.tag="${{ github.sha }}" --set tasks.image.tag="${{ github.sha }}" --set openshiftjobs.image.tag="${{ github.sha }}"
