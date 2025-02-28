@@ -11,14 +11,14 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}-webapp
+  WEBAPP_IMAGE_NAME: ${{ github.repository }}-webapp
 
 
 jobs:
   build-and-push-webapp:
     runs-on: ubuntu-latest
     name: Build & Push Webapp Image
-#    environment: dev
+    environment: dev
     permissions:
       contents: read
       packages: write
@@ -38,11 +38,11 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.WEBAPP_IMAGE_NAME }}
           tags: |
             type=raw,value=latest
             type=raw,value=latest-dev
-            type=sha
+            type=sha,format=long
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -64,10 +64,10 @@ jobs:
             
 
 
-  # versionUpdate:
+  # updateOpenShiftGold:
   #   needs: [build-and-push-webapp]
   #   runs-on: ubuntu-latest
-  #   name: Deploy Latest Images
+  #   name: Deploy Latest Images to OpenShift Gold
   #   environment:
   #     name: dev
   #     url: https://dev-ride.apps.gold.devops.gov.bc.ca
@@ -83,12 +83,42 @@ jobs:
   #   - name: Authenticate and set context
   #     uses: redhat-actions/oc-login@v1
   #     with:
-  #       openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
-  #       openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+  #       openshift_server_url: ${{ secrets.OPENSHIFT_GOLD_SERVER }}
+  #       openshift_token: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
   #       namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
   #       insecure_skip_tls_verify: true
 
-  #   - name: Helm upgrade on OpenShift Environment
+  #   - name: Helm upgrade on OpenShift Gold Environment
   #     run: |
   #       helm dependency update ./infrastructure/main
-  #       helm upgrade dev-drivebc -f ./infrastructure/main/values-dev.yaml ./infrastructure/main --set django.image.tag="${{ github.sha }}" --set redis.image.tag="${{ github.sha }}" --set static.image.tag="${{ github.sha }}" --set tasks.image.tag="${{ github.sha }}" --set openshiftjobs.image.tag="${{ github.sha }}"
+  #       helm upgrade dev-drivebc -f ./infrastructure/main/values-dev.yaml ./infrastructure/main --set webapp.image.tag="${{ github.sha }}"
+
+
+    # updateOpenShiftGoldDR:
+  #   needs: [build-and-push-webapp]
+  #   runs-on: ubuntu-latest
+  #   name: Deploy Latest Images to OpenShift Gold
+  #   environment:
+  #     name: dev
+  #     url: https://dev-ride.apps.golddr.devops.gov.bc.ca
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
+
+  #   - name: Install CLI tools from OpenShift Mirror
+  #     uses: redhat-actions/openshift-tools-installer@v1
+  #     with:
+  #       oc: "4"
+     
+  #   - name: Authenticate and set context
+  #     uses: redhat-actions/oc-login@v1
+  #     with:
+  #       openshift_server_url: ${{ secrets.OPENSHIFT_GOLDDR_SERVER }}
+  #       openshift_token: ${{ secrets.OPENSHIFT_GOLDDR_TOKEN }}
+  #       namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+  #       insecure_skip_tls_verify: true
+
+  #   - name: Helm upgrade on OpenShift Gold Environment
+  #     run: |
+  #       helm dependency update ./infrastructure/main
+  #       helm upgrade dev-drivebc -f ./infrastructure/main/values-dev.yaml ./infrastructure/main --set webapp.image.tag="${{ github.sha }}"
