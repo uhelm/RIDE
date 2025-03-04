@@ -123,4 +123,4 @@ jobs:
     - name: Helm upgrade on OpenShift Gold Environment
       run: |
         helm dependency update ./infrastructure/main
-        helm upgrade dev-drivebc -f ./infrastructure/main/values-dev.yaml ./infrastructure/main --set webapp.image.tag="${{ github.sha }}"
+        helm upgrade dev-ride -f ./infrastructure/main/values-dev.yaml ./infrastructure/main --set webapp.image.tag="${{ github.sha }}"
