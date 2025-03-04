@@ -1,0 +1,27 @@
+#This template will create the initial ConfigMap for the application. If it already exists it will not overwrite the values.
+#It will also not be deleted when the Helm release is deleted.
+
+{{- if not (lookup "v1" "ConfigMap" .Release.Namespace (include "app.fullname" .)) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "app.fullname" . }}
+  labels: {{ include "app.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/resource-policy": keep
+data:
+  DJANGO_ALLOWED_HOSTS: ""
+  DJANGO_CORS_ORIGIN_WHITELIST: ""
+  DJANGO_SUPERUSER_USERNAME: ""
+  DJANGO_SUPERUSER_EMAIL: ""
+  DJANGO_SUPERUSER_PASSWORD: ""
+  DJANGO_CSRF_COOKIE_SECURE: ""
+  DJANGO_SECURE_SSL_REDIRECT: ""
+  DJANGO_SESSION_COOKIE_SECURE: ""
+  DJANGO_EMAIL_BACKEND: ""
+  DJANGO_EMAIL_HOST: ""
+  DJANGO_EMAIL_PORT: ""
+  SHOW_DEBUG_TOOLBAR: ""
+  DEBUG: ""
+  # If the ConfigMap exists, no need to define values here (they are already set in the ConfigMap).
+  {{- end }}

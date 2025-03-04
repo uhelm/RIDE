@@ -13,7 +13,6 @@ env:
   REGISTRY: ghcr.io
   WEBAPP_IMAGE_NAME: ${{ github.repository }}-webapp
 
-
 jobs:
   build-and-push-webapp:
     runs-on: ubuntu-latest
@@ -24,6 +23,13 @@ jobs:
       packages: write
 
     steps:
+      - name: Output Run ID
+        run: echo ${{ github.run_id }}
+      - name: Output Run Number
+        run: echo ${{ github.run_number }}
+      - name: Output Run Attempt
+        run: echo ${{ github.run_attempt }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
     
@@ -43,6 +49,7 @@ jobs:
             type=raw,value=latest
             type=raw,value=latest-dev
             type=sha,format=long
+            type=raw,value=${{ github.sha }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -61,64 +68,59 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-            
+  update-openShift-gold:
+    needs: [build-and-push-webapp]
+    runs-on: ubuntu-latest
+    name: Deploy Latest Images to OpenShift Gold
+    environment:
+      name: dev
+      url: https://dev-ride.apps.gold.devops.gov.bc.ca
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Install CLI tools from OpenShift Mirror
+      uses: redhat-actions/openshift-tools-installer@v1
+      with:
+        oc: "4"
+      
+    - name: Authenticate and set context
+      uses: redhat-actions/oc-login@v1
+      with:
+        openshift_server_url: ${{ secrets.OPENSHIFT_GOLD_SERVER }}
+        openshift_token: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
+        namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+        insecure_skip_tls_verify: true
+    - name: Helm upgrade on OpenShift Gold Environment
+      run: |
+        helm dependency update ./infrastructure/main
+        helm upgrade dev-ride -f ./infrastructure/main/values-dev.yaml ./infrastructure/main --set webapp.image.tag="${{ github.sha }}"
 
+  # I have this run after the push to Gold because I want to make sure that Gold runs the migrations first. Gold DR can't run migrations as DB is read-only
+  updateOpenShiftGoldDR:
+    needs: [update-openShift-gold] 
+    runs-on: ubuntu-latest
+    name: Deploy Latest Images to OpenShift GoldDR
+    environment:
+      name: dev
+      url: https://dev-ride.apps.golddr.devops.gov.bc.ca
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-  # updateOpenShiftGold:
-  #   needs: [build-and-push-webapp]
-  #   runs-on: ubuntu-latest
-  #   name: Deploy Latest Images to OpenShift Gold
-  #   environment:
-  #     name: dev
-  #     url: https://dev-ride.apps.gold.devops.gov.bc.ca
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
-
-  #   - name: Install CLI tools from OpenShift Mirror
-  #     uses: redhat-actions/openshift-tools-installer@v1
-  #     with:
-  #       oc: "4"
+    - name: Install CLI tools from OpenShift Mirror
+      uses: redhat-actions/openshift-tools-installer@v1
+      with:
+        oc: "4"
      
-  #   - name: Authenticate and set context
-  #     uses: redhat-actions/oc-login@v1
-  #     with:
-  #       openshift_server_url: ${{ secrets.OPENSHIFT_GOLD_SERVER }}
-  #       openshift_token: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
-  #       namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
-  #       insecure_skip_tls_verify: true
+    - name: Authenticate and set context
+      uses: redhat-actions/oc-login@v1
+      with:
+        openshift_server_url: ${{ vars.OPENSHIFT_GOLDDR_SERVER }}
+        openshift_token: ${{ secrets.OPENSHIFT_GOLDDR_TOKEN }}
+        namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+        insecure_skip_tls_verify: true
 
-  #   - name: Helm upgrade on OpenShift Gold Environment
-  #     run: |
-  #       helm dependency update ./infrastructure/main
-  #       helm upgrade dev-drivebc -f ./infrastructure/main/values-dev.yaml ./infrastructure/main --set webapp.image.tag="${{ github.sha }}"
-
-
-    # updateOpenShiftGoldDR:
-  #   needs: [build-and-push-webapp]
-  #   runs-on: ubuntu-latest
-  #   name: Deploy Latest Images to OpenShift Gold
-  #   environment:
-  #     name: dev
-  #     url: https://dev-ride.apps.golddr.devops.gov.bc.ca
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
-
-  #   - name: Install CLI tools from OpenShift Mirror
-  #     uses: redhat-actions/openshift-tools-installer@v1
-  #     with:
-  #       oc: "4"
-     
-  #   - name: Authenticate and set context
-  #     uses: redhat-actions/oc-login@v1
-  #     with:
-  #       openshift_server_url: ${{ secrets.OPENSHIFT_GOLDDR_SERVER }}
-  #       openshift_token: ${{ secrets.OPENSHIFT_GOLDDR_TOKEN }}
-  #       namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
-  #       insecure_skip_tls_verify: true
-
-  #   - name: Helm upgrade on OpenShift Gold Environment
-  #     run: |
-  #       helm dependency update ./infrastructure/main
-  #       helm upgrade dev-drivebc -f ./infrastructure/main/values-dev.yaml ./infrastructure/main --set webapp.image.tag="${{ github.sha }}"
+    - name: Helm upgrade on OpenShift Gold Environment
+      run: |
+        helm dependency update ./infrastructure/main
+        helm upgrade dev-drivebc -f ./infrastructure/main/values-dev.yaml ./infrastructure/main --set webapp.image.tag="${{ github.sha }}"

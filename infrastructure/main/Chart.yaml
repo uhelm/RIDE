@@ -1,0 +1,11 @@
+apiVersion: v2
+name: RIDE
+description: A Helm chart for RIDE
+type: application
+version: 0.1.0
+appVersion: '0.1.0'
+dependencies:
+  - name: webapp
+    version: '0.1.0'
+    repository: 'file://../_webapp'
+    condition: webapp.enabled

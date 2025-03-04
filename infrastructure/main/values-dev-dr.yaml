@@ -1,0 +1,36 @@
+nameOverride: dev-ride
+fullnameOverride: dev-ride
+
+webapp:
+  fullnameOverride: dev-ride-webapp
+  nameOverride: dev-ride-webapp
+
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/bcgov/ride-webapp
+    tag: latest-dev
+
+  prometheus:
+    enabled: false
+
+  deployment:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 250Mi
+      limits:
+        memory: 500Mi
+    env:
+      postgresSecret: dev-ride-db-crunchy-pguser-dev-ride-db
+      webappConfigMap: dev-ride-webapp
+      webappSecret: dev-ride-webapp
+
+  route:
+    host: dev-ride.apps.golddr.devops.gov.bc.ca
+    iprestricted: false #Set to true if you want to limit IP's the the addresses in the ipallowlist below
+    ipallowlist: 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 #The first 4 ranges are GOV IP's, the last one is for OXD external IP
+
+  podDisruptionBudget: 
+    enabled: false # If you have more than 1 replica, you can set this to true. Disable if only 1 replica to prevent issues
+    minAvailable: 1 
