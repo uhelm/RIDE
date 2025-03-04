@@ -1,5 +1,6 @@
 nameOverride: dev-ride
 fullnameOverride: dev-ride
+namespace: f4dbc3
 
 webapp:
   fullnameOverride: dev-ride-webapp
@@ -13,6 +14,12 @@ webapp:
 
   prometheus:
     enabled: false
+
+  vault:
+    licenceplate: f4dbc3
+    environment: nonprod #Set to prod if you want to use the prod vault or nonprod for dev/test/uat
+    authPath: auth/k8s-golddr # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
+    secretName: dev-ride-webapp
 
   deployment:
     resources:

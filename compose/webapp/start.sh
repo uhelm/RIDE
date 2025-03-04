@@ -18,5 +18,8 @@ python manage.py createsuperuser \
 
 echo 'creating superuser done; starting service'
 
+env | grep hello # for testing VAULT
+env | grep test # for testing VAULT
+
 export DJANGO_SETTINGS_MODULE=config.settings
 gunicorn -b 0.0.0.0 --reload config.wsgi 2> /tmp/gunicorn.log

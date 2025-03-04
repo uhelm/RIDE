@@ -20,6 +20,20 @@ spec:
     metadata:
       labels:
         {{ include "app.selectorLabels" . | nindent 8 }}
+      annotations: 
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/agent-inject-secret-secrets.env: {{ .Values.vault.licenceplate }}-{{ .Values.vault.environment}}/{{ .Values.vault.secretName }}
+        vault.hashicorp.com/agent-inject-template-secrets.env: |
+          {{`{{- with secret `}}"{{ .Values.vault.licenceplate }}-{{ .Values.vault.environment }}/{{ .Values.vault.secretName }}"{{` }}
+          {{- range $key, $value := .Data.data }}
+          export {{$key}}="{{$value}}"
+          {{- end }}
+          {{- end `}} }}
+        vault.hashicorp.com/agent-inject-token: 'false'
+        vault.hashicorp.com/agent-pre-populate-only: 'true'
+        vault.hashicorp.com/auth-path: {{ .Values.vault.authPath }}
+        vault.hashicorp.com/namespace: platform-services
+        vault.hashicorp.com/role: {{ .Values.vault.licenceplate }}-{{ .Values.vault.environment}}
     spec:
       containers:
         - resources:
@@ -35,7 +49,10 @@ spec:
             runAsNonRoot: true
             allowPrivilegeEscalation: false
           command:
-            - /start.sh
+            - sh
+            - '-c'
+          args:
+            - . /vault/secrets/secrets.env && /start.sh
           env:
             - name: DEPLOYMENT_TAG
               value: {{ $deploymentTag | quote }}
@@ -78,6 +95,7 @@ spec:
           terminationMessagePolicy: File
           image: >-
             {{ .Values.image.repository  }}:{{ .Values.image.tag  }}
+      serviceAccountName: {{ .Values.vault.licenceplate }}-vault
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
