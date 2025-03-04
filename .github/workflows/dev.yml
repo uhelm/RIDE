@@ -120,7 +120,7 @@ jobs:
         namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
         insecure_skip_tls_verify: true
 
-    - name: Helm upgrade on OpenShift Gold Environment
+    - name: Helm upgrade on OpenShift GoldDR Environment
       run: |
         helm dependency update ./infrastructure/main
-        helm upgrade dev-ride -f ./infrastructure/main/values-dev.yaml ./infrastructure/main --set webapp.image.tag="${{ github.sha }}"
+        helm upgrade dev-ride -f ./infrastructure/main/values-dev-dr.yaml ./infrastructure/main --set webapp.image.tag="${{ github.sha }}"
