@@ -86,8 +86,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.deployment.env.webappConfigMap  }}
-            - secretRef:
-                name: {{ .Values.deployment.env.webappSecret  }}
           ports:
             - containerPort: 8000
               protocol: TCP
