@@ -1,0 +1,23 @@
+name: Weekly OWASP ZAP Baseline Scan on Dev Site
+on:
+  schedule:
+    # Runs every week at 01:00 Sunday Morning.
+    - cron:  '0 1 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+    name: Scan ZAP Test Site
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: ZAP Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: "https://dev-ride.apps.gold.devops.gov.bc.ca/"
+          rules_file_name: "zap-rules.tsv"
