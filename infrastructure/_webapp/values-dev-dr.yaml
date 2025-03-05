@@ -14,7 +14,7 @@ vault:
   licenceplate: f4dbc3
   environment: nonprod #Set to prod if you want to use the prod vault
   authPath: auth/k8s-golddr # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
-  secretName: dev-webapp-secret
+  secretName: dev-webapp
 
 deployment:
   resources:
@@ -25,9 +25,10 @@ deployment:
       memory: 500Mi
   env:
     postgresSecret: dev-ride-db-crunchy-pguser-dev-ride-db
-    webappConfigMap: dev-ride-webapp
-    webappSecret: dev-ride-webapp
-
+    variables:
+      SHOW_DEBUG_TOOLBAR: 'True'
+      DEBUG: 'True'
+      
 route:
   host: dev-ride.apps.golddr.devops.gov.bc.ca
   iprestricted: false #Set to true if you want to limit IP's the the addresses in the ipallowlist below

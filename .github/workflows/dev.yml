@@ -23,18 +23,14 @@ jobs:
       packages: write
 
     steps:
-      - name: Output Run ID
-        run: echo ${{ github.run_id }}
       - name: Output Run Number
         run: echo ${{ github.run_number }}
-      - name: Output Run Attempt
-        run: echo ${{ github.run_attempt }}
 
       - name: Checkout repository
         uses: actions/checkout@v4
     
       - name: Log in to the Container registry
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -42,7 +38,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.WEBAPP_IMAGE_NAME }}
           tags: |
@@ -68,7 +64,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  update-openShift-gold:
+  update-openshift-gold:
     needs: [build-and-push-webapp]
     runs-on: ubuntu-latest
     name: Deploy Latest Images to OpenShift Gold
@@ -97,7 +93,7 @@ jobs:
 
   # I have this run after the push to Gold because I want to make sure that Gold runs the migrations first. Gold DR can't run migrations as DB is read-only
   update-openshift-golddr:
-    needs: [update-openShift-gold] 
+    needs: [update-openshift-gold] 
     runs-on: ubuntu-latest
     name: Deploy Latest Images to OpenShift GoldDR
     environment:

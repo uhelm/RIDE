@@ -58,6 +58,10 @@ spec:
               value: {{ $deploymentTag | quote }}
             - name: DEPLOYMENT_TIME
               value: {{ $deploymentTime | quote }}
+            {{- range $key, $value := .Values.deployment.env.variables }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
@@ -83,9 +87,6 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.deployment.env.postgresSecret  }}
                   key: dbname
-          envFrom:
-            - configMapRef:
-                name: {{ .Values.deployment.env.webappConfigMap  }}
           ports:
             - containerPort: 8000
               protocol: TCP
