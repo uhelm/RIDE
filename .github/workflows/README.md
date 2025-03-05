@@ -9,7 +9,7 @@ Add these variables like this:
 1. Give it a name (dev, test, uat, prod)
 1. Add these Environment and Secret Variables
     1. Variable: `OPENSHIFT_NAMESPACE`
-        - Use the project namespace with the `-dev` (ie just `a781ec`)
+        - Use the project namespace with the `-dev` (ie `abc123-dev`)
     1. Variable: `OPENSHIFT_GOLD_SERVER`
         - This will be the API Server you see when you get your token from OpenShift
     1. Secret: `OPENSHIFT_GOLD_TOKEN`
@@ -17,7 +17,7 @@ Add these variables like this:
     1. If Applicable:
         1. Variable: `OPENSHIFT_GOLDDR_SERVER`
             - This will be the API Server you see when you get your token from OpenShift
-        1. Secret: `OPENSHIFT_GOLDDR_Token`
+        1. Secret: `OPENSHIFT_GOLDDR_TOKEN`
             - Use the Pipeline Token (From `pipeline-token-xxxxxxxx` secret)
 
 
