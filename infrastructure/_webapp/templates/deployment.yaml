@@ -94,6 +94,16 @@ spec:
           terminationMessagePolicy: File
           image: >-
             {{ .Values.image.repository  }}:{{ .Values.image.tag  }}
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
       serviceAccountName: {{ .Values.vault.licenceplate }}-vault
       affinity:
         podAntiAffinity:
