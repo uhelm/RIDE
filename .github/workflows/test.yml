@@ -1,0 +1,40 @@
+name: 2. Build & Deploy to Test
+
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  WEBAPP_IMAGE_NAME: ${{ github.repository }}-webapp
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    name: Create Tag and set Variable
+    permissions:
+        contents: write
+    outputs:
+      tag: ${{ steps.create_tag.outputs.tag }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Output Run Number
+      run: echo ${{ github.run_number }}
+
+    - name: Create Tag
+      id: create_tag
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        git config --global user.name "${{ github.actor }}"
+        git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+        git tag b${{ github.run_number }}
+        git push origin b${{ github.run_number }}
+        echo "tag=b${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+
+    - name: Display Tag Name
+      run: |
+        echo "Tag Name: ${{ steps.create_tag.outputs.tag }}"
+
