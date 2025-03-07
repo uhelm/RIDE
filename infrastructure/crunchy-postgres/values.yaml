@@ -45,7 +45,7 @@ crunchy:
 
     requests:
       cpu: 50m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       memory: 512Mi
     replicaCertCopy:
@@ -75,7 +75,7 @@ crunchy:
       enabled: true # if enabled, below must be provided
       retention: 7 # one weeks backup in object store.
       bucket:  # DO NOT UPLOAD TO GITHUB
-      endpoint:  # DO NOT UPLOAD TO GITHUB
+      endpoint: 
       accessKey:  # DO NOT UPLOAD TO GITHUB
       secretKey:  # DO NOT UPLOAD TO GITHUB
       fullBackupSchedule: 0 9 * * * # make sure to provide values here, if s3 is enabled.
@@ -92,15 +92,15 @@ crunchy:
     repoHost:
       requests:
         cpu: 20m
-        memory: 128Mi
+        memory: 64Mi
       limits:
-        memory: 256Mi
+        memory: 128Mi
     sidecars:
       requests:
         cpu: 5m
-        memory: 128Mi
+        memory: 64Mi
       limits:
-        memory: 256Mi
+        memory: 128Mi
     jobs:
       requests:
         cpu: 20m
@@ -119,7 +119,7 @@ crunchy:
         min_wal_size: 32MB
         max_wal_size: 64MB # default is 1GB
         max_slot_wal_keep_size: 256MB # default is -1, allowing unlimited wal growth when replicas fall behind
-        work_mem: 2MB # a work_mem value of 2 MB
+        work_mem: 4MB # a work_mem value of 4 MB (default)
         log_min_duration_statement: 1000ms # log queries taking more than 1 second to respond.
         effective_io_concurrency: 20 #If the underlying disk can handle multiple simultaneous requests, then you should increase the effective_io_concurrency value and test what value provides the best application performance. All BCGov clusters have SSD.
 
@@ -134,7 +134,7 @@ crunchy:
         memory: 32Mi
       limits:
         memory: 64Mi
-      maxConnections: 10 # make sure less than postgres max connections
+      maxConnections: 95 # make sure less than postgres max connections. Postgres max connections is 100
 
   # pgMonitor values:
   pgmonitor:
@@ -142,10 +142,10 @@ crunchy:
     exporter:
       image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
       requests:
-        cpu: 1m
-        memory: 16Mi
+        cpu: 10m
+        memory: 128Mi # Seems to require 128Mi to run properly. If I set to 64Mi then I don't see any metrics in Sysdig
       limits:
-        memory: 32Mi
+        memory: 256Mi
 
   # Use this field to set a custom password for the user that is generated with the same db name. This is important if setting up a DR site
   # that you want to have running in a read-only mode. Otherwise the dr site cannot connect to the db with the generated password till
@@ -153,4 +153,4 @@ crunchy:
   # If not enabled, the password will be generated randomly.
   user:
     customPassword: true # set to true or false
-    password: # DO NOT UPLOAD TO GITHUB
+    password:  # DO NOT UPLOAD TO GITHUB

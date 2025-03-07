@@ -196,10 +196,10 @@ spec:
         pgbackrestConfig:
           resources:
             requests:
-              cpu: {{ .Values.crunchy.pgBackRest.sidecars.requests.cpu }}
-              memory: {{ .Values.crunchy.pgBackRest.sidecars.requests.memory }}
+              cpu: {{ .Values.crunchy.pgBackRest.config.requests.cpu }}
+              memory: {{ .Values.crunchy.pgBackRest.config.requests.memory }}
             limits:
-              memory: {{ .Values.crunchy.pgBackRest.sidecars.limits.memory }}
+              memory: {{ .Values.crunchy.pgBackRest.config.limits.memory }}
       jobs:
         resources:
           requests:
