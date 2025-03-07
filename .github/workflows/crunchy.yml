@@ -1,26 +1,55 @@
-name: Mixed inputs
+# This workflow is to update Crunchy using Github actions
+
+name: Crunchy Update
 
 on:
   workflow_dispatch:
     inputs:
-      name:
-        type: choice
-        description: Who to greet
-        options: 
-        - monalisa
-        - cschleiden
-      message:
-        required: true
-      use-emoji:
-        type: boolean
-        description: Include 🎉🤣 emojis
       environment:
         type: environment
+      cluster:
+        type: choice
+        description: OpenShift Cluster
+        options: 
+        - Gold
+        - GoldDR
+
 
 jobs:
-  greet:
+  update-openshift:
     runs-on: ubuntu-latest
-
+    name: Deploy Latest Helm Chart to ${{ github.event.inputs.cluster }} on ${{ github.event.inputs.environment }}
+    environment:
+      name: ${{ github.event.inputs.environment }}
     steps:
-    - name: Send greeting
-      run: echo "${{ github.event.inputs.message }} ${{ fromJSON('["", "🥳"]')[github.event.inputs.use-emoji == 'true'] }} ${{ github.event.inputs.name }}"
+    - name: Select OpenShift Server and Token
+      run: |
+        if [[ "${{ github.event.inputs.cluster }}" == "Gold" ]]; then
+          echo "SERVER=${{ vars.OPENSHIFT_GOLD_SERVER }}" >> $GITHUB_ENV
+          echo "TOKEN=${{ vars.TOKEN_TEST }}" >> $GITHUB_ENV
+        else
+          echo "SERVER=${{ vars.OPENSHIFT_GOLDDR_SERVER }}" >> $GITHUB_ENV
+          echo "TOKEN=${{ secrets.TOKEN_TEST }}" >> $GITHUB_ENV
+        fi
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install CLI tools from OpenShift Mirror
+      uses: redhat-actions/openshift-tools-installer@v1
+      with:
+        oc: "4"
+          
+    - name: Authenticate and set context
+      uses: redhat-actions/oc-login@v1
+      with:
+        openshift_server_url: $SERVER
+        openshift_token: $TOKEN
+        namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+        insecure_skip_tls_verify: true
+
+#        - name: Helm upgrade on OpenShift Gold Environment
+#          run: |
+#            helm upgrade dev-ride-db -f ./infrastructure/crunchy-postgres/values-dev-gold.yaml ./infrastructure/crunchy-postgres
+
+
