@@ -26,10 +26,10 @@ jobs:
       run: |
         if [[ "${{ github.event.inputs.cluster }}" == "Gold" ]]; then
           echo "SERVER=${{ vars.OPENSHIFT_GOLD_SERVER }}" >> $GITHUB_ENV
-          echo "TOKEN=${{ vars.TOKEN_TEST }}" >> $GITHUB_ENV
+          echo "TOKEN=${{ vars.OPENSHIFT_GOLD_TOKEN }}" >> $GITHUB_ENV
         else
           echo "SERVER=${{ vars.OPENSHIFT_GOLDDR_SERVER }}" >> $GITHUB_ENV
-          echo "TOKEN=${{ secrets.TOKEN_TEST }}" >> $GITHUB_ENV
+          echo "TOKEN=${{ secrets.OPENSHIFT_GOLDDR_TOKEN }}" >> $GITHUB_ENV
         fi
 
     - name: Checkout code

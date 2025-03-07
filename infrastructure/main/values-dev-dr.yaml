@@ -24,10 +24,10 @@ webapp:
   deployment:
     resources:
       requests:
-        cpu: 50m
-        memory: 250Mi
+        cpu: 10m
+        memory: 75Mi
       limits:
-        memory: 500Mi
+        memory: 300Mi
     env:
       postgresSecret: dev-ride-db-crunchy-pguser-dev-ride-db
       variables:
