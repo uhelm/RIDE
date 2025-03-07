@@ -43,8 +43,8 @@ jobs:
     - name: Authenticate and set context
       uses: redhat-actions/oc-login@v1
       with:
-        openshift_server_url: $SERVER
-        openshift_token: $TOKEN
+        openshift_server_url: ${{ env.SERVER }}
+        openshift_token: ${{ env.TOKEN }}
         namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
         insecure_skip_tls_verify: true
 
