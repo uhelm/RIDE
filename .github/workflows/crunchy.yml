@@ -1,0 +1,49 @@
+# This workflow is to update Crunchy using Github actions
+
+name: Crunchy Update
+
+on:
+    workflow_call:
+      inputs:
+        name:
+          type: choice
+          description: Who to greet
+          options: 
+          - monalisa
+          - cschleiden
+        message:
+          required: true
+        use-emoji:
+          type: boolean
+          description: Include 🎉🤣 emojis
+        environment:
+          type: environment
+
+jobs:
+    update-openshift-gold:
+        runs-on: ubuntu-latest
+        name: Deploy Latest Helm Chart to Gold
+        environment:
+          name: dev
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Install CLI tools from OpenShift Mirror
+          uses: redhat-actions/openshift-tools-installer@v1
+          with:
+            oc: "4"
+          
+        - name: Authenticate and set context
+          uses: redhat-actions/oc-login@v1
+          with:
+            openshift_server_url: ${{ vars.OPENSHIFT_GOLD_SERVER }}
+            openshift_token: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
+            namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+            insecure_skip_tls_verify: true
+
+#        - name: Helm upgrade on OpenShift Gold Environment
+#          run: |
+#            helm upgrade dev-ride -f ./infrastructure/crunchy-postgres/values-dev-gold.yaml ./infrastructure/crunchy-postgres
+
+
