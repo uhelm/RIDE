@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Create Tag and set Variable
     permissions:
-        contents: write
+      contents: write
     outputs:
       tag: ${{ steps.create_tag.outputs.tag }}
 
@@ -20,10 +20,24 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Generate Date-Time Tag
+    - name: Generate Incremental Tag
       id: generate_tag
       run: |
-        TAG=$(date +"%Y%m%d-%H%M%S")
+        # Fetch existing tags
+        git fetch --tags
+        
+        # Find the highest existing "b" tag number
+        LAST_RUN_ID=$(git tag -l "b*" | sed -E "s/b//" | sort -n | tail -n 1)
+        
+        # Default to 0 if no previous run ID found
+        if [ -z "$LAST_RUN_ID" ]; then
+          LAST_RUN_ID=0
+        fi
+        
+        # Increment run ID
+        RUN_ID=$((LAST_RUN_ID + 1))
+        TAG="b${RUN_ID}"
+        
         echo "tag=$TAG" >> $GITHUB_OUTPUT
 
     - name: Create Tag
@@ -39,7 +53,3 @@ jobs:
     - name: Display Tag Name
       run: |
         echo "Tag Name: ${{ steps.create_tag.outputs.tag }}"
-
-
-
-
