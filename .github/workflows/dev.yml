@@ -23,9 +23,6 @@ jobs:
       packages: write
 
     steps:
-      - name: Output Run Number
-        run: echo ${{ github.run_number }}
-
       - name: Checkout repository
         uses: actions/checkout@v4
     

@@ -39,14 +39,14 @@ Due to how the clusters are setup, you will need to update the password for `ccp
 Here are the steps: https://access.crunchydata.com/documentation/postgres-operator/latest/guides/exporter-configuration#setting-a-custom-ccp_monitoring-password
 Essentially:
 1. Go to the Primary Cluster
-1. Go to secrets and get the password from CLUSTER-monitoring
-1. Run `oc edit secret CLUSTER-monitoring` on the Standby Cluster
+1. Go to `secrets` and get the password from `ENV-ride-db-crunchy-monitoring`
+1. On the Standby Cluster, run `oc edit secret ENV-ride-db-crunchy-monitoring` on the Standby Cluster
 1. Remove the current data section and add:
 ```
 stringData:
   password: <PASSWORD FROM PRIMARY CLUSTER>
 ```
-
+1. Close the file which should automatically save
 
 ## Changes after initial install
 Changes can be made easily once the Crunchy Cluster is already installed. Simply run the following commands on the appropriate OpenShift Cluster

@@ -19,15 +19,15 @@ spec:
       stanza: {{ .Values.crunchy.instances.name }}
       configuration:
         - secret:
-            name: {{ .Release.Name }}-s3-secret
+            name: {{ .Values.crunchy.clone.s3SecretName }}
       global:
         repo2-s3-uri-style: path # This is mandatory since the backups are path based.
         repo2-path: {{ .Values.crunchy.clone.path }} # path to the backup where cluster will bootstrap from
       repo:
         name: repo2 # hardcoded since repo 2, it is always backed up to object storage.
         s3:
-          bucket: {{ .Values.crunchy.pgBackRest.s3.bucket }}
-          endpoint: {{ .Values.crunchy.pgBackRest.s3.endpoint }}
+          bucket: {{ .Values.crunchy.clone.bucket }}
+          endpoint: {{ .Values.crunchy.clone.endpoint }}
           region: "ca-central-1"
     {{- end}}
     {{- if .Values.crunchy.clone.pvc.enabled}}
