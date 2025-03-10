@@ -1,4 +1,4 @@
-name: 3. Build & Deploy to Prod
+name: 3. Build & Deploy to UAT
 
 on:
   workflow_dispatch:
