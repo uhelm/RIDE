@@ -1,7 +1,6 @@
 name: 4. Promote from UAT to Prod
 
 on: 
-  workflow_dispatch: #Make sure you select a tag and not a branch if using manually
   release:
     types: [published]
 
