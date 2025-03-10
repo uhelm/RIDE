@@ -42,7 +42,6 @@ jobs:
             type=raw,value=latest
             type=raw,value=latest-dev
             type=sha,format=long
-            type=raw,value=${{ github.sha }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -86,7 +85,7 @@ jobs:
     - name: Helm upgrade on OpenShift Gold Environment
       run: |
         helm dependency update ./infrastructure/main
-        helm upgrade dev-ride -f ./infrastructure/main/values-dev-gold.yaml ./infrastructure/main --set webapp.image.tag="${{ github.sha }}"
+        helm upgrade dev-ride -f ./infrastructure/main/values-dev-gold.yaml ./infrastructure/main --set webapp.image.tag="sha-${{ github.sha }}"
 
   # I have this run after the push to Gold because I want to make sure that Gold runs the migrations first. Gold DR can't run migrations as DB is read-only
   update-openshift-golddr:
@@ -116,4 +115,4 @@ jobs:
     - name: Helm upgrade on OpenShift GoldDR Environment
       run: |
         helm dependency update ./infrastructure/main
-        helm upgrade dev-ride -f ./infrastructure/main/values-dev-golddr.yaml ./infrastructure/main --set webapp.image.tag="${{ github.sha }}"
+        helm upgrade dev-ride -f ./infrastructure/main/values-dev-golddr.yaml ./infrastructure/main --set webapp.image.tag="sha-${{ github.sha }}"

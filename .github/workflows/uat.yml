@@ -1,4 +1,4 @@
-name: 2. Build & Deploy to Test
+name: 3. Build & Deploy to Prod
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ jobs:
         git fetch --tags
         
         # Find the highest existing "b" tag number
-        LAST_RUN_ID=$(git tag -l "b*" | sed -E "s/b//" | sort -n | tail -n 1)
+        LAST_RUN_ID=$(git tag -l "rc*" | sed -E "s/rc//" | sort -n | tail -n 1)
         
         # Default to 0 if no previous run ID found
         if [ -z "$LAST_RUN_ID" ]; then
@@ -36,7 +36,7 @@ jobs:
         
         # Increment run ID
         RUN_ID=$((LAST_RUN_ID + 1))
-        TAG="b${RUN_ID}"
+        TAG="rc${RUN_ID}"
         
         echo "tag=$TAG" >> $GITHUB_OUTPUT
 
@@ -80,7 +80,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.WEBAPP_IMAGE_NAME }}
           tags: |
             type=raw,value=latest
-            type=raw,value=latest-test
+            type=raw,value=latest-uat
             type=sha,format=long
             type=raw,value=${{ needs.tag.outputs.tag }}
 
@@ -97,7 +97,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args:
-            DEBUG_BUILD=true
+            DEBUG_BUILD=false
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -106,8 +106,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Latest Images to OpenShift Gold
     environment:
-      name: test
-      url: https://test-ride.apps.gold.devops.gov.bc.ca
+      name: uat
+      url: https://uat-ride.apps.gold.devops.gov.bc.ca
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -125,8 +125,8 @@ jobs:
         insecure_skip_tls_verify: true
     - name: Helm upgrade on OpenShift Gold Environment
       run: |
-        helm dependency update ./infrastructure/main
-        helm upgrade test-ride -f ./infrastructure/main/values-test-gold.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}"
+#        helm dependency update ./infrastructure/main
+#        helm upgrade uat-ride -f ./infrastructure/main/values-uat-gold.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}"
 
   # I have this run after the push to Gold because I want to make sure that Gold runs the migrations first. Gold DR can't run migrations as DB is read-only
   update-openshift-golddr:
@@ -134,8 +134,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Latest Images to OpenShift GoldDR
     environment:
-      name: test
-      url: https://test-ride.apps.golddr.devops.gov.bc.ca
+      name: uat
+      url: https://uat-ride.apps.golddr.devops.gov.bc.ca
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -155,5 +155,5 @@ jobs:
 
     - name: Helm upgrade on OpenShift GoldDR Environment
       run: |
-        helm dependency update ./infrastructure/main
-        helm upgrade test-ride -f ./infrastructure/main/values-test-golddr.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}"
+#        helm dependency update ./infrastructure/main
+#        helm upgrade uat-ride -f ./infrastructure/main/values-uat-golddr.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}"

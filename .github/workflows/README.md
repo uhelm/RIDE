@@ -1,4 +1,4 @@
-### Setting up Github
+# Setting up Github
 
 The dev, test, uat, prod workflows need to have environment variables setup in OpenShift
 
@@ -21,4 +21,21 @@ Add these variables like this:
             - Use the Pipeline Token (From `pipeline-token-xxxxxxxx` secret)
 
 
-These workflows are designed to push to both OpenShift Gold and GoldDR at the same time. 
+# Workflows
+### Build and Deploy to Dev
+- Trigger: Manual or on push to Main
+- Purpose: Builds latest image from main and pushes to Gold and Gold DR
+
+### Build and Deploy to Test
+- Trigger: Manual
+- Purpose: Builds latest image from main and pushes to Gold and Gold DR
+- Notes: Uses an incrementing build number. It looks at the tag with the highest number starting with `b` and increments from there. It also generates a git tag
+
+### Build and Deploy to UAT
+- Trigger: Manual
+- Purpose: Builds latest image from a releases branch and pushes to Gold and Gold DR
+- Notes: Uses an incrementing build number. It looks at the tag with the highest number starting with `rc` and increments from there. It also generates a git tag
+
+### Deploy to Prod
+- Trigger: Manual
+- Purpose: Based on what the user entered in the Release, it uses that git tag to push to prod in Gold and Gold DR

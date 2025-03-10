@@ -1,0 +1,82 @@
+name: 4. Promote from UAT to Prod
+
+on: 
+  workflow_dispatch: #Make sure you select a tag and not a branch if using manually
+  release:
+    types: [published]
+
+env:
+  REGISTRY: ghcr.io
+  WEBAPP_IMAGE_NAME: ${{ github.repository }}-webapp
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    name: Create Tag Variable
+    timeout-minutes: 1
+    outputs:
+      tag: ${{ steps.create_tag.outputs.tag }}
+
+    steps:
+      - name: Set the tag variable
+        id: create_tag
+        run: |
+          vtag=${{ github.ref_name }}
+          echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+
+  update-openShift-gold:
+    needs: [tag]
+    runs-on: ubuntu-latest
+    name: Deploy Latest Images to OpenShift Gold
+    environment:
+      name: prod
+      url: https://prod-ride.apps.gold.devops.gov.bc.ca
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Install CLI tools from OpenShift Mirror
+      uses: redhat-actions/openshift-tools-installer@v1
+      with:
+        oc: "4"
+      
+    - name: Authenticate and set context
+      uses: redhat-actions/oc-login@v1
+      with:
+        openshift_server_url: ${{ vars.OPENSHIFT_GOLD_SERVER }}
+        openshift_token: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
+        namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+        insecure_skip_tls_verify: true
+    - name: Helm upgrade on OpenShift Gold Environment
+      run: |
+#        helm dependency update ./infrastructure/main
+#        helm upgrade prod-ride -f ./infrastructure/main/values-prod.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}"
+
+  # I have this run after the push to Gold because I want to make sure that Gold runs the migrations first. Gold DR can't run migrations as DB is read-only
+  update-openshift-golddr:
+    needs: [update-openShift-gold, tag] 
+    runs-on: ubuntu-latest
+    name: Deploy Latest Images to OpenShift GoldDR
+    environment:
+      name: prod
+      url: https://prod-ride.apps.golddr.devops.gov.bc.ca
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install CLI tools from OpenShift Mirror
+      uses: redhat-actions/openshift-tools-installer@v1
+      with:
+        oc: "4"
+     
+    - name: Authenticate and set context
+      uses: redhat-actions/oc-login@v1
+      with:
+        openshift_server_url: ${{ vars.OPENSHIFT_GOLDDR_SERVER }}
+        openshift_token: ${{ secrets.OPENSHIFT_GOLDDR_TOKEN }}
+        namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+        insecure_skip_tls_verify: true
+
+    - name: Helm upgrade on OpenShift GoldDR Environment
+      run: |
+#        helm dependency update ./infrastructure/main
+#        helm upgrade prod-ride -f ./infrastructure/main/values-prod-dr.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}"
