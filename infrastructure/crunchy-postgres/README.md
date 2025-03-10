@@ -30,7 +30,7 @@ Assumptions:
 If you are setting up Crunchy in Active-Standby configuration you will also need to do these steps:
 1. Copy the values file you used for gold
 1. Ensure `crunchy.standby.enabled=true` and save
-1. Trigger a manual backup on the cluster in Gold using this command `oc annotate -n NAMESPACE postgrescluster ENV-ride-db --overwrite postgres-operator.crunchydata.com/pgbackrest-backup="$(date)"` and wait for the backup to complete
+1. Trigger a manual backup on the cluster in Gold using this command `oc annotate -n NAMESPACE postgrescluster ENV-ride-db-crunchy --overwrite postgres-operator.crunchydata.com/pgbackrest-backup="$(date)"` and wait for the backup to complete
 1. Login to the GoldDR cluster using `oc`
 1. Run `helm install ENV-ride-db -f .\crunchy-postgres\values-ENV-golddr.yaml .\crunchy-postgres`
 1. Check that it's running as a standby.

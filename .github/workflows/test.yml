@@ -20,8 +20,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Output Run Number
-      run: echo ${{ github.run_number }}
+    - name: Generate Date-Time Tag
+      id: generate_tag
+      run: |
+        TAG=$(date +"%Y%m%d-%H%M%S")
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
 
     - name: Create Tag
       id: create_tag
@@ -29,12 +32,14 @@ jobs:
       run: |
         git config --global user.name "${{ github.actor }}"
         git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-        git tag b${{ github.run_number }}
-        git push origin b${{ github.run_number }}
-        echo "tag=b${{ github.run_number }}" >> $GITHUB_OUTPUT
-
+        git tag ${{ steps.generate_tag.outputs.tag }}
+        git push origin ${{ steps.generate_tag.outputs.tag }}
+        echo "tag=${{ steps.generate_tag.outputs.tag }}" >> $GITHUB_OUTPUT
 
     - name: Display Tag Name
       run: |
         echo "Tag Name: ${{ steps.create_tag.outputs.tag }}"
+
+
+
 
