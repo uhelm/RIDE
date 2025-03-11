@@ -104,7 +104,7 @@ jobs:
   update-openshift-gold:
     needs: [tag, build-and-push-webapp]
     runs-on: ubuntu-latest
-    name: Deploy Latest Images to OpenShift Gold
+    name: Deploy Latest Image (${{ needs.tag.outputs.tag }}) to OpenShift Gold
     environment:
       name: uat
       url: https://uat-ride.apps.gold.devops.gov.bc.ca
@@ -132,7 +132,7 @@ jobs:
   update-openshift-golddr:
     needs: [tag, update-openshift-gold] 
     runs-on: ubuntu-latest
-    name: Deploy Latest Images to OpenShift GoldDR
+    name: Deploy Latest Image (${{ needs.tag.outputs.tag }}) to OpenShift GoldDR
     environment:
       name: uat
       url: https://uat-ride.apps.golddr.devops.gov.bc.ca

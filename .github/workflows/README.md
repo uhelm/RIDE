@@ -1,4 +1,6 @@
-# Setting up Github
+# Github Workflows
+
+### Initial Github Setup
 
 The dev, test, uat, prod workflows need to have environment variables setup in OpenShift
 
@@ -14,28 +16,46 @@ Add these variables like this:
         - This will be the API Server you see when you get your token from OpenShift
     1. Secret: `OPENSHIFT_GOLD_TOKEN`
         - Use the Pipeline Token (From `pipeline-token-xxxxxxxx` secret)
-    1. If Applicable:
-        1. Variable: `OPENSHIFT_GOLDDR_SERVER`
-            - This will be the API Server you see when you get your token from OpenShift
-        1. Secret: `OPENSHIFT_GOLDDR_TOKEN`
-            - Use the Pipeline Token (From `pipeline-token-xxxxxxxx` secret)
+    1. Variable: `OPENSHIFT_GOLDDR_SERVER`
+        - This will be the API Server you see when you get your token from OpenShift
+    1. Secret: `OPENSHIFT_GOLDDR_TOKEN`
+        - Use the Pipeline Token (From `pipeline-token-xxxxxxxx` secret)
 
 
 # Workflows
-### Build and Deploy to Dev
-- Trigger: Manual or on push to Main
-- Purpose: Builds latest image from main and pushes to Gold and Gold DR
+### 1. Build & Deploy to Dev
+- **What:** Generates a new image from the code in `main` and deploys to Gold/GoldDR
+- **Trigger:** Manual or on push to `main` branch
+- **Image Tags:** `latest`, `latest-dev`, and `sha` 
 
-### Build and Deploy to Test
-- Trigger: Manual
-- Purpose: Builds latest image from main and pushes to Gold and Gold DR
-- Notes: Uses an incrementing build number. It looks at the tag with the highest number starting with `b` and increments from there. It also generates a git tag
+### 2. Build & Deploy to Test
+- **Purpose:** Generates a Git tag starting with `b` and increments that number. It will then build and deploy new images to Gold/GoldDR
+- **Trigger:** Manual
+- **Purpose:** Builds latest image from main and pushes to Gold and Gold DR
+- **Image Tags:** `latest`, `latest-test`, `b##` and `sha` 
 
-### Build and Deploy to UAT
-- Trigger: Manual
-- Purpose: Builds latest image from a releases branch and pushes to Gold and Gold DR
-- Notes: Uses an incrementing build number. It looks at the tag with the highest number starting with `rc` and increments from there. It also generates a git tag
+### 3. Build & Deploy to UAT
+- **Purpose:** Generates a Git tag starting with `rc` and increments that number. It will then build and deploy new images to Gold/GoldDR
+- **Trigger:** Manual
+- **Image Tags:** `latest`, `latest-uat`, `rc##` and `sha` 
+- **NOTE:** This should be run from a `releases` branch
 
 ### Deploy to Prod
-- Trigger: Manual
-- Purpose: Based on what the user entered in the Release, it uses that git tag to push to prod in Gold and Gold DR
+- **Purpose:** Promote the selected image tag from UAT to Prod
+- **Trigger:** Manual by doing these steps:
+    1. Go to `Releases` on the main Github Page
+    1. Click `Draft a new release`
+    1. Chose the tag you want to push to prod
+    1. Click `Generate release notes`
+    1. Give it a title (Default will be the tag which we do not want)
+    1. Click `Publish Release`
+
+### Zap Scan
+- **Purpose:** Automatically runs a OWASP ZAP Scan against dev. Results can be found on the issues tab
+- **Trigger:** Automatic on Sundays at 1am
+
+### Weekly Trivy Image Scans
+- **Purpose:** To identify any `HIGH` or `CRITICAL` vulnerabilities in the images. Results are uploaded to the Github Security Tab
+- **Trigger:** Automatic on Sundays at 2am
+
+

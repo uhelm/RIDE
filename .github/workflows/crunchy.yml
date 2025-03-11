@@ -1,6 +1,6 @@
 # This workflow is to update Crunchy using Github actions
 
-name: Crunchy Update
+name: Crunchy DB Update
 
 on:
   workflow_dispatch:
@@ -33,7 +33,7 @@ jobs:
         fi
 
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4 
 
     - name: Install CLI tools from OpenShift Mirror
       uses: redhat-actions/openshift-tools-installer@v1
@@ -48,8 +48,7 @@ jobs:
         namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
         insecure_skip_tls_verify: true
 
-#        - name: Helm upgrade on OpenShift Gold Environment
-#          run: |
-#            helm upgrade dev-ride-db -f ./infrastructure/crunchy-postgres/values-dev-gold.yaml ./infrastructure/crunchy-postgres
-
+    - name: Helm upgrade on OpenShift Gold Environment
+      run: |
+        helm upgrade ${{ github.event.inputs.environment }}-ride-db -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}-${{ github.event.inputs.cluster }}.yaml ./infrastructure/crunchy-postgres  --set crunchy.pgbackRest.s3.bucket=${{ vars.CRUNCHY_BUCKET }} --set crunchy.pgbackrest.s3.endpoint=${{ vars.CRUNCHY_ENDPOINT }}
 
