@@ -11,9 +11,8 @@ on:
         type: choice
         description: OpenShift Cluster
         options: 
-        - Gold
-        - GoldDR
-
+        - gold
+        - golddr
 
 jobs:
   update-openshift:
@@ -24,7 +23,7 @@ jobs:
     steps:
     - name: Select OpenShift Server and Token
       run: |
-        if [[ "${{ github.event.inputs.cluster }}" == "Gold" ]]; then
+        if [[ "${{ github.event.inputs.cluster }}" == "gold" ]]; then
           echo "SERVER=${{ vars.OPENSHIFT_GOLD_SERVER }}" >> $GITHUB_ENV
           echo "TOKEN=${{ vars.OPENSHIFT_GOLD_TOKEN }}" >> $GITHUB_ENV
         else
@@ -48,7 +47,7 @@ jobs:
         namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
         insecure_skip_tls_verify: true
 
-    - name: Helm upgrade on OpenShift Gold Environment
+    - name: Helm upgrade on OpenShift ${{ github.event.inputs.environment }} Environment
       run: |
         helm upgrade ${{ github.event.inputs.environment }}-ride-db -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}-${{ github.event.inputs.cluster }}.yaml ./infrastructure/crunchy-postgres  --set crunchy.pgbackRest.s3.bucket=${{ vars.CRUNCHY_BUCKET }} --set crunchy.pgbackrest.s3.endpoint=${{ vars.CRUNCHY_ENDPOINT }}
 
