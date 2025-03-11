@@ -49,5 +49,5 @@ jobs:
 
     - name: Helm upgrade on OpenShift ${{ github.event.inputs.environment }} Environment
       run: |
-        helm upgrade ${{ github.event.inputs.environment }}-ride-db -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}-${{ github.event.inputs.cluster }}.yaml ./infrastructure/crunchy-postgres  --set crunchy.pgbackRest.s3.bucket=${{ vars.CRUNCHY_BUCKET }} --set crunchy.pgbackrest.s3.endpoint=${{ vars.CRUNCHY_ENDPOINT }}
+        helm upgrade ${{ github.event.inputs.environment }}-ride-db -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}-${{ github.event.inputs.cluster }}.yaml ./infrastructure/crunchy-postgres  --set crunchy.pgbackRest.s3.bucket=${{ secrets.CRUNCHY_BUCKET }} --set crunchy.pgbackrest.s3.endpoint=${{ secrets.CRUNCHY_ENDPOINT }}
 
