@@ -8,7 +8,7 @@ global:
     environment: prod #Set to prod if you want to use the prod vault or nonprod for dev/test/uat
   route:
     ipallowlist: 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 #The first 4 ranges are GOV IP's, the last one is for OXD external IP
-
+  release: # This is set by Github actions for the prod release. Do not change this value.
 
 webapp:
   component: webapp # Used for the selector label as well as appended to the nameOverride and fullnameOverride in various components
