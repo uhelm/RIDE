@@ -4,7 +4,7 @@ $ENDPOINT = ""
 $ACCESS_KEY = ""
 $SECRET_KEY = ""
 $PASSWORD = ""
-$ENV = ""
+$ENV = "dev"
 
 # Function to check the OpenShift cluster
 function Test-OnGoldCluster {
@@ -31,6 +31,38 @@ function Test-OnGoldDRCluster {
         Write-Error "Error: Not on GoldDR cluster"
         exit 1
     }
+}
+
+# Step 0: Get variables for this file from current postgrescluster object
+function Get-Variables {
+    $clusterName = $ENV + "-ride-db-crunchy"
+    $postgresCluster = oc get postgrescluster $clusterName -o json | ConvertFrom-Json
+    # Access the S3 endpoint and S3 bucket
+    $s3Bucket = $postgresCluster.spec.backups.pgbackrest.repos[1].s3.bucket
+    $s3Endpoint = $postgresCluster.spec.backups.pgbackrest.repos[1].s3.endpoint
+
+    # Get the user secret in JSON format
+    $secret = oc get secret $clusterName-pguser-$ENV-ride-db -o json | ConvertFrom-Json
+    # Access the 'password' field
+    $base64Password = $secret.data.password
+    # Decode the password from base64
+    $password = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($base64Password))
+
+    # Get the s3 secret in JSON format
+    $secret = oc get secret $ENV-ride-db-s3-secret -o json | ConvertFrom-Json
+    # Access the 'password' field
+    $base64s3conf = $secret.data."s3.conf"
+    # Decode the password from base64
+    $s3conf = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($base64s3conf))
+
+    # Display the decoded password
+    Write-Host "Use this information to update the variables at the top of this file before running the next steps." -ForegroundColor Cyan
+    Write-Host "User Password: $password"
+    Write-Host "S3 Secret info: $s3conf"
+
+    # Display the values
+    Write-Host "S3 Bucket: $s3Bucket"
+    Write-Host "S3 Endpoint: $s3Endpoint"
 }
 
 # Step 1: Shutdown the DB in Gold (if cluster is available).
@@ -128,7 +160,7 @@ function Restore-GoldDRStandby {
 function Update-GoldDRMonitoringPassword {
     Test-OnGoldDRCluster
     Write-Host "Enter the new monitoring password in the notepad file that will open. Save and close the file when done."
-    Write-Host "To do this, replace the word data with StringData, remove the verifier line and copy the password from the secret with the same name in Gold"
+    Write-Host "To do this, replace the word data with stringData, remove the verifier line and copy the password from the secret with the same name in Gold"
     oc edit secret $ENV-ride-db-crunchy-monitoring
 }
 
@@ -138,6 +170,7 @@ Write-Host "You must be on the correct cluster to perform each step. Please ensu
 Write-Host "Current Project: " -NoNewline -ForegroundColor Red
 oc project
 Write-Host "Choose a step to run:"
+Write-Host "0. Get variables for this file from current postgrescluster object (Make sure ENV is set though)"
 Write-Host "1. Shutdown Gold DB (Must be on Gold Cluster)"
 Write-Host "2. Set Gold DR Primary (Must be on Gold DR Cluster)"
 Write-Host "3. Delete Gold DB (Must be on Gold Cluster)"
@@ -154,6 +187,7 @@ $step = Read-Host
 switch ($step) {
     "00" { Test-OnGoldCluster }
     "01" { Test-OnGoldDRCluster }
+    "0" { Get-Variables }
     "1" { Disable-GoldDB }
     "2" { Set-GoldDRPrimary }
     "3" { Remove-GoldDB }

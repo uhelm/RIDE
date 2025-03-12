@@ -2,43 +2,16 @@
 
 A chart to provision the RIDE WebApp.
 
-## Configuration
+## Initial Setup
+To do the initial install in a namespace:
+1. Ensure the Database is setup and running
+1. Ensure Vault has all the required variables setup (and setup so they will work for both Gold/GoldDR)
+1. Ensure the Values file looks correct for the environment
+1. Do initial install in Gold with this command `helm install ENV-ride -f .\helm\values-ENV-gold.yaml .\helm`
+1. Login to GoldDR Cluster
+1. Do initial install in GoldDR with this command `helm install ENV-ride -f .\helm\values-ENV-gold.yaml -f .\helm\values-ENV-golddr.yaml .\helm`
 
-### Django Options
 
-| Parameter             | Description                         | Default                                |
-| --------------------- | ----------------------------------- | -------------------------------------- |
-| `fullnameOverride`     | Instance Name if other than default | `webapp`                               |
-| `nameOverride`         | Instance Name if other than default | `webapp`                               |
-| `replicaCount`         | Number of replicas to run           | `1`                                    |
-| `repository`           | Image source                        | `ghcr.io/bcgov/ride-webapp`            |
-| `tag`                  | Image tag                           | `latest`                               |
-| `CPU Request`          | CPU request amount                  | `50m`                                  |
-| `Memory Request`       | Memory request amount               | `250Mi`                                |
-| `postgresSecret`       | The pguser secret name              | `ride-db-pguser-ride-db`               |
-| `routeHost`            | Hostname for the route              | `ride.apps.gold.devops.gov.bc.ca`     |
-| `ipRestricted`         | Should it be IP restricted?         | `false`                                |
-| `ipAllowList`          | List of IPs allowed to connect      | `142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32` |
-| `podDisruptionBudget`  | Pod disruption budget               | Not set                                |
-| `enabled`              | Enable if more than one replica     | `false`                                |
-| `minAvailable`         | Minimum number of pods available    | `1`                                    |
-
-### Prometheus
-
-| Parameter             | Description                         | Default        |
-| --------------------- | ----------------------------------- | -------------- |
-| `enabled`             | Enable Prometheus monitoring        | `false`        |
-
-### Vault
-
-| Parameter             | Description                         | Default        |
-| --------------------- | ----------------------------------- | -------------- |
-| `licenceplate`        | Licence plate identifier            | `f4dbc3`       |
-| `environment`         | Environment (nonprod or prod)       | `nonprod`      |
-| `authPath`            | Vault authentication path          | `auth/k8s-gold` |
-| `secretName`          | Vault secret name                   | `webapp-secret` |
-
-## Components
 
 ### OpenShift
 
