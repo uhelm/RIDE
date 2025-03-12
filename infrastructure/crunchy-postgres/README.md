@@ -103,6 +103,16 @@ stringData:
   password: <PASSWORD FROM PRIMARY CLUSTER>
 ```
 
+## Failover Script
+In this folder there is a Powershell script that goes through all the steps above. To use:
+1. Copy this repo to your PC
+1. Navigate to this folder in Powershell
+1. Review `dbFailover.ps1` and enter the varibles as well as check which steps need to be done on which cluster.
+1. Depending on the status of the Cluster, scale down the site so it's not attempting to write data anymore
+1. Depending on the step you want to do, ensure you are logged into the correct OpenShift cluster
+1. Run `dbFailover.ps1`
+1. Repeat the last 3 steps till process complete. All steps are in order of completion.
+
 
 # Monitoring
 Since Prometheus and the Exporter are setup you can monitor and get alerting through Sysdig. Sysdig has a number of built in dashboards and alerts you can use.
