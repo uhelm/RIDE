@@ -52,10 +52,18 @@ function Set-GoldDRPrimary {
         --set crunchy.standby.enabled=false
 }
 
-# Step 3: Delete Gold DB so that we can rebuild it.
+# Step 3: Delete Gold DB so that we can rebuild it. 
 function Remove-GoldDB {
     Test-OnGoldCluster
-    helm uninstall "$ENV-ride-db"
+    # Ask user for confirmation before proceeding
+    $confirmation = Read-Host "Are you sure you want to uninstall $ENV-ride-db in Gold? (Y/N)"
+    
+    if ($confirmation -eq 'Y' -or $confirmation -eq 'y') {
+        helm uninstall "$ENV-ride-db"
+        Write-Host "$ENV-ride-db has been uninstalled."
+    } else {
+        Write-Host "Uninstallation of $ENV-ride-db canceled."
+    }
 }
 
 # Step 4: Rebuild Gold DB as a Standby
@@ -91,8 +99,18 @@ function Set-GoldPrimary {
 
 # Step 7: Delete Gold DR DB to prepare for making it a Standby again
 function Remove-GoldDRDB {
+    # Test if Gold DR Cluster exists
     Test-OnGoldDRCluster
-    helm uninstall "$ENV-ride-db"
+    
+    # Ask user for confirmation before proceeding
+    $confirmation = Read-Host "Are you sure you want to uninstall $ENV-ride-db in GoldDR? (Y/N)"
+    
+    if ($confirmation -eq 'Y' -or $confirmation -eq 'y') {
+        helm uninstall "$ENV-ride-db"
+        Write-Host "$ENV-ride-db has been uninstalled."
+    } else {
+        Write-Host "Uninstallation of $ENV-ride-db canceled."
+    }
 }
 
 # Step 8: Rebuild Gold DR as a Standby
@@ -104,6 +122,14 @@ function Restore-GoldDRStandby {
         --set crunchy.pgBackRest.s3.accessKey="$ACCESS_KEY" `
         --set crunchy.pgBackRest.s3.secretKey="$SECRET_KEY" `
         --set crunchy.user.password="$PASSWORD"
+}
+
+# Step 9: Update Monitoring Password
+function Update-GoldDRMonitoringPassword {
+    Test-OnGoldDRCluster
+    Write-Host "Enter the new monitoring password in the notepad file that will open. Save and close the file when done."
+    Write-Host "To do this, replace the word data with StringData, remove the verifier line and copy the password from the secret with the same name in Gold"
+    oc edit secret $ENV-ride-db-crunchy-monitoring
 }
 
 # Prompt user for step
@@ -120,7 +146,7 @@ Write-Host "5. Shutdown Gold DR DB (Must be on Gold DR Cluster)"
 Write-Host "6. Set Gold Primary (Must be on Gold Cluster)"
 Write-Host "7. Delete Gold DR DB (Must be on Gold DR Cluster)"
 Write-Host "8. Rebuild Gold DR Standby (Must be on Gold DR Cluster)"
-Write-Host "9. Manually Update Monitoring Password (see Readme)"
+Write-Host "9. Set Monitoring Password (Must be on Gold DR Cluster)"
 Write-Host "Enter the step number: " -NoNewline
 $step = Read-Host
 
@@ -136,5 +162,6 @@ switch ($step) {
     "6" { Set-GoldPrimary }
     "7" { Remove-GoldDRDB }
     "8" { Restore-GoldDRStandby }
+    "9" { Update-GoldDRMonitoringPassword }
     default { Write-Host "Invalid step number." }
 }
