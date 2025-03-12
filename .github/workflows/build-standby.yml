@@ -1,4 +1,4 @@
-name: 1. Build & Deploy to Dev
+name: 1. Build standbycheck
 # Based on: https://docs.github.com/en/actions/use-cases-and-examples/publishing-packages/publishing-docker-images
 
 #Will automatically run on a push to main, but can also be run manually
