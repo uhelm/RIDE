@@ -8,7 +8,6 @@ RUN touch /run/nginx.pid
 RUN microdnf -y install nginx-core tar gzip
 
 COPY ./nginx/* /etc/nginx
-#RUN chmod -R 777 /run/nginx.pid /var/log/nginx /etc/nginx/conf.d
 WORKDIR /opt/app-root/src/
 RUN curl -O https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux-amd64-rhel9.tar.gz
 RUN tar xvzf ./openshift-client-linux-amd64-rhel9.tar.gz
@@ -26,4 +25,4 @@ fi
 ADD --chmod=755 ./lbcheck.sh /lbcheck.sh
 ADD --chmod=755 ./entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["bash", "/entrypoint.sh"]
