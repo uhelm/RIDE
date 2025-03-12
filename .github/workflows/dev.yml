@@ -3,10 +3,6 @@ name: 1. Build & Deploy to Dev
 
 #Will automatically run on a push to main, but can also be run manually
 on:
-  push:
-    branches: [ "main" ]
-    paths-ignore:
-    - '.github/**'
   workflow_dispatch:
 
 env:
