@@ -22,7 +22,7 @@ RUN if [ ${DEBUG_BUILD} = true ]; then \
   microdnf -y install jq vim procps less; \
 fi
 
-ADD --chmod=755 ./lbcheck.sh /lbcheck.sh
-ADD --chmod=755 ./entrypoint.sh /entrypoint.sh
+COPY ./lbcheck.sh /lbcheck.sh
+COPY --chmod=755 ./entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["bash", "/entrypoint.sh"]
