@@ -7,7 +7,7 @@ RUN touch /run/nginx.pid
 #RUN apk add bash
 RUN microdnf -y install nginx-core tar gzip
 
-COPY ./nginx/* /etc/nginx
+COPY ./compose/standbycheck/nginx/* /etc/nginx
 WORKDIR /opt/app-root/src/
 RUN curl -O https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux-amd64-rhel9.tar.gz
 RUN tar xvzf ./openshift-client-linux-amd64-rhel9.tar.gz
