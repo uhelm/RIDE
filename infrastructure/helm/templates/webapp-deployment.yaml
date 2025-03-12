@@ -60,9 +60,9 @@ spec:
               value: {{ $deploymentTag | quote }}
             - name: DEPLOYMENT_TIME
               value: {{ $deploymentTime | quote }}
-            {{- range $key, $value := .Values.webapp.deployment.env.variables }}
             - name: RELEASE
               value: {{ .Values.global.release }}
+            {{- range $key, $value := .Values.webapp.deployment.env.variables }}
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
