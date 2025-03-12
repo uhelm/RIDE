@@ -91,4 +91,4 @@ jobs:
 
     - name: Helm upgrade on OpenShift GoldDR Environment
       run: |
-        helm upgrade prod-ride -f ./infrastructure/helm/values-prod-gold.yaml -f ./infrastructure/helm/values-prod-golddr.yaml ./infrastructure/helm --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set global.release.="${{ github.event.release.name }}"
+        helm upgrade prod-ride -f ./infrastructure/helm/values-prod-gold.yaml -f ./infrastructure/helm/values-prod-golddr.yaml ./infrastructure/helm --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set global.release="${{ github.event.release.name }}"
