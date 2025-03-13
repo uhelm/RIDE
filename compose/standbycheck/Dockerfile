@@ -1,16 +1,13 @@
-FROM registry.access.redhat.com/ubi9/ubi-minimal
+FROM alpine:edge
 
 EXPOSE 8080
 
-RUN touch /run/nginx.pid
+RUN apk add gcompat bash curl tar gzip caddy
 
-#RUN apk add bash
-RUN microdnf -y install nginx-core tar gzip
-
-COPY ./compose/standbycheck/nginx/* /etc/nginx
-WORKDIR /opt/app-root/src/
-RUN curl -O https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux-amd64-rhel9.tar.gz
-RUN tar xvzf ./openshift-client-linux-amd64-rhel9.tar.gz
+WORKDIR /opt/
+RUN curl -O https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux-amd64-rhel9.tar.gz && \
+tar xvzf ./openshift-client-linux-amd64-rhel9.tar.gz && \
+rm ./openshift-client-linux-amd64-rhel9.tar.gz
 
 USER root
 RUN mv oc /usr/local/bin
@@ -19,10 +16,10 @@ ARG DEBUG_BUILD=true
 
 # Add debugging tools into builds if enabled
 RUN if [ ${DEBUG_BUILD} = true ]; then \
-  microdnf -y install jq vim procps less; \
+  apk add jq vim procps less; \
 fi
 
-ADD --chmod=755 ./compose/standbycheck/lbcheck.sh /lbcheck.sh
-ADD --chmod=755 ./compose/standbycheck/entrypoint.sh /entrypoint.sh
+ADD --chmod=755 ./app /app
+ADD --chmod=755 ./start.sh /start.sh
 
-ENTRYPOINT ["bash", "/entrypoint.sh"]
+CMD ["bash", "/start.sh"]

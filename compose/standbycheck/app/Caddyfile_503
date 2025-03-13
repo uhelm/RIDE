@@ -1,0 +1,12 @@
+{
+	auto_https off
+	persist_config off
+	storage_clean_interval off
+	storage_check off
+	http_port 8080
+	metrics
+}
+
+localhost:8080 {
+	respond / "server down!" 503
+}
