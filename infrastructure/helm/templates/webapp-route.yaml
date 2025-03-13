@@ -1,0 +1,51 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ template "app.fullname" . }}-{{ .Values.webapp.component }}
+  labels: {{ include "app.labels" . | nindent 4 }}
+{{ if .Values.webapp.route.iprestricted }}
+  annotations:
+    haproxy.router.openshift.io/ip_whitelist: {{ .Values.global.route.ipallowlist  }}
+{{ end }}
+spec:
+  to:
+    kind: Service
+    name: {{ template "app.fullname" . }}-{{ .Values.webapp.component }}
+  port:
+    targetPort: 80-tcp
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+  host: {{ .Values.webapp.route.host  }}
+  path: /
+
+
+---
+{{- if .Values.webapp.route.vanityurl }}
+{{- $routeExists := lookup "route.openshift.io/v1" "Route" .Release.Namespace (printf "%s-%s-vanityurl" (include "app.fullname" .) .Values.webapp.component) }}
+{{- if not $routeExists }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ template "app.fullname" . }}-{{ .Values.webapp.component }}-vanityurl
+  labels: {{ include "app.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/resource-policy": keep
+    {{ if .Values.webapp.route.iprestricted }}
+    haproxy.router.openshift.io/ip_whitelist: {{ .Values.global.route.ipallowlist  }}
+    {{ end }}
+spec:
+  to:
+    kind: Service
+    name: {{ template "app.fullname" . }}-{{ .Values.webapp.component }}
+  port:
+    targetPort: 80-tcp
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+  host: {{ .Values.webapp.route.vanityurlhost  }}
+  path: /
+{{- end }}
+{{- end }}

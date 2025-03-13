@@ -23,6 +23,21 @@ jobs:
           vtag=${{ github.ref_name }}
           echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
+  #This job adds 'latest-prod' docker tags to the existing image in Github Packages so it's always clear which image is current for a particular environment
+  addDockerTag:
+    needs: [tag]
+    runs-on: ubuntu-latest
+    name: Add latest-prod Tag
+    steps:
+    - name: Add latest-prod tag to webapp image
+      uses: shrink/actions-docker-registry-tag@v4
+      with:
+        registry: ghcr.io
+        repository: bcgov/ride-webapp
+        target: ${{ needs.tag.outputs.tag }}
+        tags: |
+          latest-prod
+
   update-openShift-gold:
     needs: [tag]
     runs-on: ubuntu-latest
@@ -47,8 +62,7 @@ jobs:
         insecure_skip_tls_verify: true
     - name: Helm upgrade on OpenShift Gold Environment
       run: |
-#        helm dependency update ./infrastructure/main
-#        helm upgrade prod-ride -f ./infrastructure/main/values-prod.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}"
+        helm upgrade prod-ride -f ./infrastructure/helm/values-prod-gold.yaml ./infrastructure/helm --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set global.release="${{ github.event.release.name }}"
 
   # I have this run after the push to Gold because I want to make sure that Gold runs the migrations first. Gold DR can't run migrations as DB is read-only
   update-openshift-golddr:
@@ -77,5 +91,4 @@ jobs:
 
     - name: Helm upgrade on OpenShift GoldDR Environment
       run: |
-#        helm dependency update ./infrastructure/main
-#        helm upgrade prod-ride -f ./infrastructure/main/values-prod-dr.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}"
+        helm upgrade prod-ride -f ./infrastructure/helm/values-prod-gold.yaml -f ./infrastructure/helm/values-prod-golddr.yaml ./infrastructure/helm --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set global.release="${{ github.event.release.name }}"

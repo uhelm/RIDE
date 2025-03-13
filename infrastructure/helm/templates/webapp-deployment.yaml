@@ -1,18 +1,20 @@
-{{- $deploymentTag := .Values.image.tag | default .Chart.AppVersion -}}
+{{- $deploymentTag := .Values.webapp.image.tag | default .Chart.AppVersion -}}
 {{- $deploymentTime := now | date "2006-01-02 15:04:05.000000" -}}
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "app.fullname" . }}
+  name: {{ template "app.fullname" . }}-{{ .Values.webapp.component }}
   labels: {{ include "app.labels" . | nindent 4 }}
-{{- if .Values.prometheus.enabled }}
+{{- if .Values.webapp.prometheus.enabled }}
 annotations:
   prometheus.io/scrape: 'true'
   prometheus.io/port: '8000'
 {{- end }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.webapp.replicaCount }}
+  strategy:
+    type: {{ .Values.webapp.deployment.strategy }}
   selector:
     matchLabels:
       {{ include "app.selectorLabels" . | nindent 6 }}
@@ -22,26 +24,26 @@ spec:
         {{ include "app.selectorLabels" . | nindent 8 }}
       annotations: 
         vault.hashicorp.com/agent-inject: 'true'
-        vault.hashicorp.com/agent-inject-secret-secrets.env: {{ .Values.vault.licenceplate }}-{{ .Values.vault.environment}}/{{ .Values.vault.secretName }}
+        vault.hashicorp.com/agent-inject-secret-secrets.env: {{ .Values.global.vault.licenceplate }}-{{ .Values.global.vault.environment}}/{{ .Values.webapp.vault.secretName }}
         vault.hashicorp.com/agent-inject-template-secrets.env: |
-          {{`{{- with secret `}}"{{ .Values.vault.licenceplate }}-{{ .Values.vault.environment }}/{{ .Values.vault.secretName }}"{{` }}
+          {{`{{- with secret `}}"{{ .Values.global.vault.licenceplate }}-{{ .Values.global.vault.environment }}/{{ .Values.webapp.vault.secretName }}"{{` }}
           {{- range $key, $value := .Data.data }}
           export {{$key}}="{{$value}}"
           {{- end }}
           {{- end `}} }}
         vault.hashicorp.com/agent-inject-token: 'false'
         vault.hashicorp.com/agent-pre-populate-only: 'true'
-        vault.hashicorp.com/auth-path: {{ .Values.vault.authPath }}
+        vault.hashicorp.com/auth-path: {{ .Values.webapp.vault.authPath }}
         vault.hashicorp.com/namespace: platform-services
-        vault.hashicorp.com/role: {{ .Values.vault.licenceplate }}-{{ .Values.vault.environment}}
+        vault.hashicorp.com/role: {{ .Values.global.vault.licenceplate }}-{{ .Values.global.vault.environment}}
     spec:
       containers:
         - resources:
             requests:
-              cpu: {{ .Values.deployment.resources.requests.cpu  }}
-              memory: {{ .Values.deployment.resources.requests.memory  }}
+              cpu: {{ .Values.webapp.deployment.resources.requests.cpu  }}
+              memory: {{ .Values.webapp.deployment.resources.requests.memory  }}
             limits:
-              memory: {{ .Values.deployment.resources.limits.memory  }}  
+              memory: {{ .Values.webapp.deployment.resources.limits.memory  }}  
           name: {{ include "app.fullname" . }}
           securityContext:
             seccompProfile:
@@ -58,34 +60,36 @@ spec:
               value: {{ $deploymentTag | quote }}
             - name: DEPLOYMENT_TIME
               value: {{ $deploymentTime | quote }}
-            {{- range $key, $value := .Values.deployment.env.variables }}
+            - name: RELEASE
+              value: {{ .Values.global.release }}
+            {{- range $key, $value := .Values.webapp.deployment.env.variables }}
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.deployment.env.postgresSecret  }}
+                  name: {{ .Values.webapp.deployment.env.postgresSecret  }}
                   key: host
             - name: DB_PORT
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.deployment.env.postgresSecret  }}
+                  name: {{ .Values.webapp.deployment.env.postgresSecret  }}
                   key: port
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.deployment.env.postgresSecret  }}
+                  name: {{ .Values.webapp.deployment.env.postgresSecret  }}
                   key: user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.deployment.env.postgresSecret  }}
+                  name: {{ .Values.webapp.deployment.env.postgresSecret  }}
                   key: password
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.deployment.env.postgresSecret  }}
+                  name: {{ .Values.webapp.deployment.env.postgresSecret  }}
                   key: dbname
           ports:
             - containerPort: 8000
@@ -93,7 +97,7 @@ spec:
           imagePullPolicy: IfNotPresent
           terminationMessagePolicy: File
           image: >-
-            {{ .Values.image.repository  }}:{{ .Values.image.tag  }}
+            {{ .Values.webapp.image.repository  }}:{{ .Values.webapp.image.tag  }}
           livenessProbe:
             tcpSocket:
               port: 8000
@@ -104,7 +108,7 @@ spec:
               port: 8000
             initialDelaySeconds: 5
             periodSeconds: 10
-      serviceAccountName: {{ .Values.vault.licenceplate }}-vault
+      serviceAccountName: {{ .Values.global.vault.licenceplate }}-vault
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:

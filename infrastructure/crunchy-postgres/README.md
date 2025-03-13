@@ -19,20 +19,23 @@ Assumptions:
 - Your folder structure is `C:\Data\DriveBC.ca` and you have the latest version of repo copied to that location (You can use a different location if you like)
 
 1. Login to `oc` 
-1. Set all the values including `bucket`, `endpoint`, `accessKey`, `secretKey`, `password` (if required)
+1. Set all the values including `crunchy.pgBackRest.s3.bucket`, `crunchy.pgBackRest.s3.endpoint`, `crunchy.pgBackRest.s3.accessKey`, `crunchy.pgBackRest.s3.secretKey`, `crunchy.user.password` (if required)
 1. Confirm you are in the correct namespace and cluster by entering `oc project`
 1. Run `cd C:\Data\RIDE\infrastructure`
 1. Confirm the values file has all values set inclu
 1. Run `helm install ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml .\crunchy-postgres`
 1. Confirm everything has installed as expected
-1. Run these commands to set DB owner in the primary pod, `psql` then `ALTER DATABASE "ENV-ride-db" OWNER TO "ENV-ride-db";`
+1. Run these commands to set DB owner in the primary pod like this
+    1. `oc exec -it $(oc get pods -l "postgres-operator.crunchydata.com/role=master" -o jsonpath='{.items[0].metadata.name}') -- /bin/bash`
+    1. `psql`
+    1.  `ALTER DATABASE "ENV-ride-db" OWNER TO "ENV-ride-db";`
+    1. Type in `exit` and then `exit` again to get back to Powershell
 
 If you are setting up Crunchy in Active-Standby configuration you will also need to do these steps:
-1. Copy the values file you used for gold
-1. Ensure `crunchy.standby.enabled=true` and save
+1. If it doesn't exist yet, have a simple golddr file with only the differences you want between clusters. (Ie `crunchy.standby.enabled=true` and save)ve
 1. Trigger a manual backup on the cluster in Gold using this command `oc annotate -n NAMESPACE postgrescluster ENV-ride-db-crunchy --overwrite postgres-operator.crunchydata.com/pgbackrest-backup="$(date)"` and wait for the backup to complete
 1. Login to the GoldDR cluster using `oc`
-1. Run `helm install ENV-ride-db -f .\crunchy-postgres\values-ENV-golddr.yaml .\crunchy-postgres`
+1. Run `helm install ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml -f .\crunchy-postgres\values-ENV-golddr.yaml .\crunchy-postgres`
 1. Check that it's running as a standby.
 
 Due to how the clusters are setup, you will need to update the password for `ccp_monitoring` for the Standby cluster based on this documentation: https://access.crunchydata.com/documentation/postgres-operator/latest/tutorials/backups-disaster-recovery/disaster-recovery#monitoring-a-standby-cluster
@@ -50,13 +53,13 @@ stringData:
 
 ## Changes after initial install
 Changes can be made easily once the Crunchy Cluster is already installed. Simply run the following commands on the appropriate OpenShift Cluster
-- `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml .\crunchy-postgres --set crunchy.pgbackRest.s3.bucket=<BUCKET> --set crunchy.pgbackrest.s3.endpoint=<ENDPOINT>`
-- `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-golddr.yaml .\crunchy-postgres --set crunchy.pgbackRest.s3.bucket=<BUCKET> --set crunchy.pgbackrest.s3.endpoint=<ENDPOINT>`
+- `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT>`
+- `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml -f .\crunchy-postgres\values-ENV-golddr.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT>`
 
 One challenge you may run into is that the Github repo doesn't contain the S3 information or custom password for the default user. Few things to note
 - If `crunchy.user.password` is blank, then it won't update it.
-- Once `crunchy.pgbackrest.s3.accessKey` and `crunchy.pgbackrest.s3.secretKey` are set in OpenShift it's setup to not change them so they can be blank
-- **IMPORTANT** You **must** ensure that `crunchy.pgbackRest.s3.bucket` and `crunchy.pgbackrest.s3.endpoint` have values, otherwise it will break the s3 backups!
+- Once `crunchy.pgBackRest.s3.accessKey` and `crunchy.pgBackRest.s3.secretKey` are set in OpenShift it's setup to not change them so they can be blank
+- **IMPORTANT** You **must** ensure that `crunchy.pgBackRest.s3.bucket` and `crunchy.pgBackRest.s3.endpoint` have values, otherwise it will break the s3 backups!
 
 
 # Failovers
@@ -75,24 +78,24 @@ To switch back:
 
 How this looks with the helm charts is this:
 1. Shutdown Cluster A:
-    - `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml .\crunchy-postgres --set crunchy.pgbackRest.s3.bucket=<BUCKET> --set crunchy.pgbackrest.s3.endpoint=<ENDPOINT> --set crunchy.shutdown=true`
+    - `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT> --set crunchy.shutdown=true`
 1. Set Cluster B as primary:
-    - `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-golddr.yaml .\crunchy-postgres --set crunchy.pgbackRest.s3.bucket=<BUCKET> --set crunchy.pgbackrest.s3.endpoint=<ENDPOINT> --set crunchy.standby.enabled=false`
+    - `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml -f .\crunchy-postgres\values-ENV-golddr.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT> --set crunchy.standby.enabled=false`
 
 To revert:
-1. Delete Cluster A
+1. Delete Cluster A (Ensure you are in Gold)
     - `helm uninstall ENV-ride-db`
-1. Rebuild Cluster A
-    - `helm install ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml .\crunchy-postgres --set crunchy.pgbackRest.s3.bucket=<BUCKET> --set crunchy.pgbackrest.s3.endpoint=<ENDPOINT> --set crunchy.pgbackrest.s3.accessKey=<ACCESS KEY> --set crunchy.pgbackrest.s3.secretKey=<SECRET KEY> --set crunchy.user.password=<PASSWORD> --set crunchy.standby.enabled=true`
+1. Rebuild Cluster A (Ensure you are in Gold)
+    - `helm install ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT> --set crunchy.pgBackRest.s3.accessKey=<ACCESS KEY> --set crunchy.pgBackRest.s3.secretKey=<SECRET KEY> --set crunchy.user.password=<PASSWORD> --set crunchy.standby.enabled=true`
 1. Wait till it indicates it's up
-1. Shutdown Cluster B
-    - `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-golddr.yaml .\crunchy-postgres --set crunchy.pgbackRest.s3.bucket=<BUCKET> --set crunchy.pgbackrest.s3.endpoint=<ENDPOINT> --set crunchy.shutdown=true`
-1. Set Cluster A as primary
-    - `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml .\crunchy-postgres --set crunchy.pgbackRest.s3.bucket=<BUCKET> --set crunchy.pgbackrest.s3.endpoint=<ENDPOINT> --set crunchy.standby.enabled=false`
-1. Delete Cluster B
+1. Shutdown Cluster B (Ensure you are in Gold DR)
+    - `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml -f .\crunchy-postgres\values-ENV-golddr.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT> --set crunchy.standby.enabled=false --set crunchy.shutdown=true`
+1. Set Cluster A as primary (Ensure you are in Gold)
+    - `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT> --set crunchy.standby.enabled=false`
+1. Delete Cluster B (Ensure you are in Gold DR)
     - `helm uninstall ENV-ride-db`
-1. Rebuild Cluster B
-    - `helm install ENV-ride-db -f .\crunchy-postgres\values-ENV-golddr.yaml .\crunchy-postgres --set crunchy.pgbackRest.s3.bucket=<BUCKET> --set crunchy.pgbackrest.s3.endpoint=<ENDPOINT> --set crunchy.pgbackrest.s3.accessKey=<ACCESS KEY> --set crunchy.pgbackrest.s3.secretKey=<SECRET KEY> --set crunchy.user.password=<PASSWORD> --set crunchy.standby.enabled=true`
+1. Rebuild Cluster B (Esnure you are in Gold DR)
+    - `helm install ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml -f .\crunchy-postgres\values-ENV-golddr.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT> --set crunchy.pgBackRest.s3.accessKey=<ACCESS KEY> --set crunchy.pgBackRest.s3.secretKey=<SECRET KEY> --set crunchy.user.password=<PASSWORD>`
 
 You may also need to do these steps to sync up the ccp_monitoring password:
 1. Go to the Primary Cluster
@@ -103,6 +106,16 @@ You may also need to do these steps to sync up the ccp_monitoring password:
 stringData:
   password: <PASSWORD FROM PRIMARY CLUSTER>
 ```
+
+## Failover Script
+In this folder there is a Powershell script that goes through all the steps above. To use:
+1. Copy this repo to your PC
+1. Navigate to this folder in Powershell
+1. Review `dbFailover.ps1` and enter the varibles as well as check which steps need to be done on which cluster. (Step 0 will help you get the variables)
+1. Depending on the status of the OpenShift Cluster, scale down the application manually so it's not attempting to write data anymore
+1. Depending on the step you want to do, ensure you are logged into the correct OpenShift cluster
+1. Run `dbFailover.ps1`
+1. Repeat the last 3 steps till process complete. All steps are in order of completion.
 
 
 # Monitoring
