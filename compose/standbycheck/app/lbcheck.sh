@@ -65,7 +65,7 @@ while true; do
         "true")
             echodate "[NOTICE] ${l_namespace}: Checking standby status for PostgresCluster ${l_cluster_name}: ${status^^}"
             failures=0
-			caddy_reload ${caddy_200_conf}
+			caddy_reload_config ${caddy_200_conf}
         ;;
 
         "false")
@@ -85,13 +85,13 @@ while true; do
             if [[ $failures -ge $max_failures ]]; then
                 echodate "[CRITCAL] ${l_namespace}: Failure count (${failures}) => max_failure_count (${max_failures})."
                 echodate "[CRITCAL] ${l_namespace}: DISABLING LOAD BALANCER CHECK. CHANGING caddy CONFIG."
-                caddy_reload ${caddy_503_conf}
+                caddy_reload_config ${caddy_503_conf}
             fi
         ;;
 
         *)
             echodate "[WARNING] ${l_namespace}: Standby status for ${l_cluster_name} unknown! Assuming healthy."
-            caddy reload -f ${caddy_200_conf}
+            caddy_reload_config ${caddy_200_conf}
         ;;
     esac
     sleep ${sleep}
