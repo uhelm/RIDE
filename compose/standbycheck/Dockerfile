@@ -4,13 +4,17 @@ EXPOSE 8080
 
 RUN apk add gcompat bash curl tar gzip caddy
 
-WORKDIR /opt/
+WORKDIR /tmp/
 RUN curl -O https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux-amd64-rhel9.tar.gz && \
 tar xvzf ./openshift-client-linux-amd64-rhel9.tar.gz && \
 rm ./openshift-client-linux-amd64-rhel9.tar.gz
 
 USER root
-RUN mv oc /usr/local/bin
+
+RUN mv oc /usr/local/bin && \
+    mv kubectl /usr/local/bin
+RUN mkdir /.kube && \
+    chmod 0777 /.kube
 
 ARG DEBUG_BUILD=true
 

@@ -1,7 +1,6 @@
 #!/bin/bash
 set -o pipefail
 set -o nounset
-set -x
 
 # secret should provide variables. assignments fail if variables don't exist
 l_namespace=${NAMESPACE}                            # GoldDR namespace
