@@ -24,7 +24,7 @@ echodate() {
 standby_status() {
     output=$(oc -n ${l_namespace} get postgrescluster ${l_cluster_name} -o jsonpath="{.spec.standby.enabled}")
     
-    // add spec.shutdown check
+    # add spec.shutdown check
 
     if [[ $? -eq 0 ]]; then
         echo $output
