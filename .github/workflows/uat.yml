@@ -58,7 +58,7 @@ jobs:
     needs: [tag]
     runs-on: ubuntu-latest
     name: Build & Push Webapp Image
-    environment: test
+    environment: uat
     permissions:
       contents: read
       packages: write
