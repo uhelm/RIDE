@@ -3,6 +3,10 @@ name: 1. Build standbycheck
 
 #Will automatically run on a push to main, but can also be run manually
 on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+    - '.github/**'
   workflow_dispatch:
 
 env:
@@ -10,9 +14,9 @@ env:
   WEBAPP_IMAGE_NAME: ${{ github.repository }}-standbycheck
 
 jobs:
-  build-and-push-webapp:
+  build-and-push-standbycheck:
     runs-on: ubuntu-latest
-    name: Build & Push Webapp Image
+    name: Build & Push standbycheck Image
     environment: dev
     permissions:
       contents: read
@@ -46,7 +50,7 @@ jobs:
         id: push
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./compose/standbycheck/
           file: ./compose/standbycheck/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
