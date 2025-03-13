@@ -24,6 +24,9 @@ echodate() {
 
 standby_status() {
     output=$(oc -n ${l_namespace} get postgrescluster ${l_cluster_name} -o jsonpath="{.spec.standby.enabled}")
+    
+    // add spec.shutdown check
+
     if [[ $? -eq 0 ]]; then
         echo $output
     else
@@ -32,7 +35,7 @@ standby_status() {
 }
 
 while true; do
-    oc login --token="$l_serviceaccount_token" --server=${l_ocp_api_server}
+    oc login --token=$l_serviceaccount_token --server=${l_ocp_api_server}
     if [[ $? -eq 0 ]]; then
         echodate "[NOTICE] Successful login to OpenShift"
         break
@@ -57,7 +60,7 @@ while true; do
 
         "false")
             echodate "[CRITICAL] ${l_namespace}: Checking standby status for PostgresCluster ${l_cluster_name}: ${status^^}"
-            echodate "[CRITICAL] ${l_namespace}: GOLDDR cluster is set to primary. Sending HTTP 501 for GOLD load balancer health check."
+            echodate "[CRITICAL] ${l_namespace}: GOLDDR cluster is set to primary. Sending HTTP 503 for GOLD load balancer health check."
             
             # fail 3 times before switching
             failures=$((failures+1))
