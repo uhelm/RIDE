@@ -3,10 +3,10 @@ set -o pipefail
 set -o nounset
 
 # secret should provide variables. assignments fail if variables don't exist
-#l_namespace=${NAMESPACE}                            # GoldDR namespace
-#l_cluster_name=${STANDBY_POSTGRESCLUSTER_NAME}      # name of PostgresCluster object
-#l_ocp_api_server=${STANDBY_OCP_API_SERVER}          # GoldDR login server
-#l_serviceaccount_token=${SERVICEACCOUNT_TOKEN}      # GoldDR service account token
+l_namespace=${NAMESPACE}                            # GoldDR namespace
+l_cluster_name=${STANDBY_POSTGRESCLUSTER_NAME}      # name of PostgresCluster object
+l_ocp_api_server=${STANDBY_OCP_API_SERVER}          # GoldDR login server
+l_serviceaccount_token=${SERVICEACCOUNT_TOKEN}      # GoldDR service account token
 
 status="true"                                       # failsave default for standby_status
 failures=0                                          # failure count init
