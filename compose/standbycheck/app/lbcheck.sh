@@ -33,6 +33,16 @@ standby_status() {
     fi
 }
 
+caddy_reload_config() {
+    caddy reload -c $1
+    ret=$?
+    if [[ $ret -eq 0 ]]; then
+        echodate "[NOTICE] Reloaded caddy configuration with: $1"
+    else
+        echodate "[CRITICAL] Unable to reload caddy configuration with: $1. Returned error code $ret"
+    fi
+}
+
 while true; do
     oc login --token=$l_serviceaccount_token --server=${l_ocp_api_server}
     if [[ $? -eq 0 ]]; then
@@ -55,7 +65,7 @@ while true; do
         "true")
             echodate "[NOTICE] ${l_namespace}: Checking standby status for PostgresCluster ${l_cluster_name}: ${status^^}"
             failures=0
-			caddy reload -f ${caddy_200_conf}
+			caddy_reload ${caddy_200_conf}
         ;;
 
         "false")
@@ -75,7 +85,7 @@ while true; do
             if [[ $failures -ge $max_failures ]]; then
                 echodate "[CRITCAL] ${l_namespace}: Failure count (${failures}) => max_failure_count (${max_failures})."
                 echodate "[CRITCAL] ${l_namespace}: DISABLING LOAD BALANCER CHECK. CHANGING caddy CONFIG."
-                caddy reload -f ${caddy_503_conf}
+                caddy_reload ${caddy_503_conf}
             fi
         ;;
 
